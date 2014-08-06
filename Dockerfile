@@ -45,7 +45,7 @@ RUN \
   /osxcross/build.sh
 
 
-# Download the Go packages for each platform
+# Define the Go packages for each platform
 ENV DIST_LINUX_64  http://golang.org/dl/go1.3.linux-amd64.tar.gz
 ENV DIST_LINUX_32  http://golang.org/dl/go1.3.linux-386.tar.gz
 ENV DIST_LINUX_ARM http://dave.cheney.net/paste/go.1.3.linux-arm~armv5-1.tar.gz
@@ -54,6 +54,8 @@ ENV DIST_OSX_32    http://golang.org/dl/go1.3.darwin-386-osx10.6.tar.gz
 ENV DIST_WIN_64    http://golang.org/dl/go1.3.windows-amd64.zip
 ENV DIST_WIN_32    http://golang.org/dl/go1.3.windows-386.zip
 
+# Download all the Go packages, install the core Linux package, inject and
+# bootstrap the others
 RUN \
   $FETCH $DIST_LINUX_64  b6b154933039987056ac307e20c25fa508a06ba6 && \
   $FETCH $DIST_LINUX_32  22db33b0c4e242ed18a77b03a60582f8014fd8a6 && \
@@ -61,23 +63,24 @@ RUN \
   $FETCH $DIST_OSX_64    82ffcfb7962ca7114a1ee0a96cac51c53061ea05 && \
   $FETCH $DIST_OSX_32    159d2797bee603a80b829c4404c1fb2ee089cc00 && \
   $FETCH $DIST_WIN_64    1e4888e1494aed7f6934acb5c4a1ffb0e9a022b1 && \
-  $FETCH $DIST_WIN_32    e4e5279ce7d8cafdf210a522a70677d5b9c7589d
-
-# Install the core Linux package, inject and bootstrap the others
-RUN \
+  $FETCH $DIST_WIN_32    e4e5279ce7d8cafdf210a522a70677d5b9c7589d && \
+  \
   tar -C /usr/local -xzf `basename $DIST_LINUX_64` && \
   tar -C /usr/local --wildcards -xzf `basename $DIST_LINUX_32` go/pkg/linux_386* && \
   GOOS=linux GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
   tar -C /usr/local --wildcards -xzf `basename $DIST_LINUX_ARM` go/pkg/linux_arm* && \
   GOOS=linux GOARCH=arm /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
+  \
   tar -C /usr/local --wildcards -xzf `basename $DIST_OSX_64` go/pkg/darwin_amd64* && \
   GOOS=darwin GOARCH=amd64 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
   tar -C /usr/local --wildcards -xzf `basename $DIST_OSX_32` go/pkg/darwin_386* && \
   GOOS=darwin GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
+  \
   unzip -d /usr/local -q `basename $DIST_WIN_64` go/pkg/windows_amd64* && \
   GOOS=windows GOARCH=amd64 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
   unzip -d /usr/local -q `basename $DIST_WIN_32` go/pkg/windows_386* && \
   GOOS=windows GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
+  \
   rm -f `basename $DIST_LINUX_64` `basename $DIST_LINUX_32` `basename $DIST_LINUX_ARM` \
     `basename $DIST_OSX_64` `basename $DIST_OSX_32` `basename $DIST_WIN_64` `basename $DIST_WIN_32`
 
