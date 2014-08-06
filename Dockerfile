@@ -103,7 +103,7 @@ RUN \
   echo 'GOOS=linux GOARCH=386 CGO_ENABLED=1 go build -o $pack-linux-386'               >> $BUILD && \
   echo                                                                                 >> $BUILD && \
   echo 'echo Compiling for linux/arm...'                                               >> $BUILD && \
-  echo 'CC=arm-linux-gnueabi-gcc \\'                                                 >> $BUILD && \
+  echo 'CC=arm-linux-gnueabi-gcc \\'                                                   >> $BUILD && \
   echo '  GOOS=linux GOARCH=arm CGO_ENABLED=1 go build -o $pack-linux-arm'             >> $BUILD && \
   echo                                                                                 >> $BUILD && \
   echo 'echo Compiling for windows/amd64...'                                           >> $BUILD && \
