@@ -35,7 +35,7 @@ func main() {
 		log.Fatalf("Failed to retrieve the working directory: %v.", err)
 	}
 	// Cross compile the requested package into the local folder
-	fmt.Printf("Cross compiling %s...", path)
+	fmt.Printf("Cross compiling %s...\n", path)
 	if err := run(exec.Command("docker", "run", "-v", pwd+":/build", container, path)); err != nil {
 		log.Fatalf("Failed to cross compile package: %v.", err)
 	}
