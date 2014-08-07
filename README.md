@@ -41,45 +41,45 @@ Installation
 Although you could build the container manually, it is available as an automatic
 trusted build from Docker's container registry (note, 530+ MB):
 
-  docker pull karalabe/xgo
+    docker pull karalabe/xgo
 
 To prevent having to remember a potentially complex Docker command every time,
 a lightweight Go wrapper was written on top of it.
 
-  go get github.com/karalabe/xgo
+    go get github.com/karalabe/xgo
 
 Usage
 -----
 
 Simply specify the import path you want to build, and xgo will do the rest:
 
-  $ xgo github.com/project-iris/iris
-  Checking docker installation...
-  Client version: 1.1.2
-  Client API version: 1.13
-  Go version (client): go1.3
-  Git commit (client): d84a070
-  Server version: 1.1.2
-  Server API version: 1.13
-  Go version (server): go1.3
-  Git commit (server): d84a070
+    $ xgo github.com/project-iris/iris
+    Checking docker installation...
+    Client version: 1.1.2
+    Client API version: 1.13
+    Go version (client): go1.3
+    Git commit (client): d84a070
+    Server version: 1.1.2
+    Server API version: 1.13
+    Go version (server): go1.3
+    Git commit (server): d84a070
 
-  Cross compiling github.com/project-iris/iris
-  Fetching github.com/project-iris/iris...
-  Compiling for linux/amd64...
-  Compiling for linux/386...
-  Compiling for linux/arm...
-  Compiling for windows/amd64...
-  Compiling for windows/386...
-  Compiling for darwin/amd64...
-  Compiling for darwin/386...
-  Moving binaries to host...
+    Cross compiling github.com/project-iris/iris
+    Fetching github.com/project-iris/iris...
+    Compiling for linux/amd64...
+    Compiling for linux/386...
+    Compiling for linux/arm...
+    Compiling for windows/amd64...
+    Compiling for windows/386...
+    Compiling for darwin/amd64...
+    Compiling for darwin/386...
+    Moving binaries to host...
 
-  $ ls -al
-  -rwxr-xr-x  1 root     root  3086860 Aug  7 10:01 iris-darwin-386
-  -rwxr-xr-x  1 root     root  3941068 Aug  7 10:01 iris-darwin-amd64
-  -rwxr-xr-x  1 root     root  4185144 Aug  7 10:01 iris-linux-386
-  -rwxr-xr-x  1 root     root  5196784 Aug  7 10:01 iris-linux-amd64
-  -rwxr-xr-x  1 root     root  4151688 Aug  7 10:01 iris-linux-arm
-  -rwxr-xr-x  1 root     root  4228608 Aug  7 10:01 iris-windows-386.exe
-  -rwxr-xr-x  1 root     root  5243904 Aug  7 10:01 iris-windows-amd64.exe
+    $ ls -al
+    -rwxr-xr-x  1 root     root  3086860 Aug  7 10:01 iris-darwin-386
+    -rwxr-xr-x  1 root     root  3941068 Aug  7 10:01 iris-darwin-amd64
+    -rwxr-xr-x  1 root     root  4185144 Aug  7 10:01 iris-linux-386
+    -rwxr-xr-x  1 root     root  5196784 Aug  7 10:01 iris-linux-amd64
+    -rwxr-xr-x  1 root     root  4151688 Aug  7 10:01 iris-linux-arm
+    -rwxr-xr-x  1 root     root  4228608 Aug  7 10:01 iris-windows-386.exe
+    -rwxr-xr-x  1 root     root  5243904 Aug  7 10:01 iris-windows-amd64.exe
