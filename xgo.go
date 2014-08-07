@@ -23,6 +23,8 @@ func main() {
 	if err := run(exec.Command("docker", "version")); err != nil {
 		log.Fatalf("Failed to check docker installation: %v.", err)
 	}
+	fmt.Println()
+
 	// Fetch and configure the compilation settings
 	if len(os.Args) != 2 {
 		log.Fatalf("Usage: %s <go import path>", os.Args[0])
@@ -33,7 +35,7 @@ func main() {
 		log.Fatalf("Failed to retrieve the working directory: %v.", err)
 	}
 	// Cross compile the requested package into the local folder
-	fmt.Println("Cross compiling", path)
+	fmt.Printf("Cross compiling %s...", path)
 	if err := run(exec.Command("docker", "run", "-v", pwd+":/build", container, path)); err != nil {
 		log.Fatalf("Failed to cross compile package: %v.", err)
 	}
