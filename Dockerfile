@@ -66,20 +66,22 @@ RUN \
   $FETCH $DIST_WIN_32    e4e5279ce7d8cafdf210a522a70677d5b9c7589d && \
   \
   tar -C /usr/local -xzf `basename $DIST_LINUX_64` && \
-  tar -C /usr/local --wildcards -xzf `basename $DIST_LINUX_32` go/pkg/linux_386* && \
-  GOOS=linux GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
-  tar -C /usr/local --wildcards -xzf `basename $DIST_LINUX_ARM` go/pkg/linux_arm* && \
-  GOOS=linux GOARCH=arm /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
+  rm -rf /usr/local/go/pkg/linux_amd64_race && \
   \
-  tar -C /usr/local --wildcards -xzf `basename $DIST_OSX_64` go/pkg/darwin_amd64* && \
-  GOOS=darwin GOARCH=amd64 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
-  tar -C /usr/local --wildcards -xzf `basename $DIST_OSX_32` go/pkg/darwin_386* && \
-  GOOS=darwin GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
+  tar -C /usr/local --wildcards -xzf `basename $DIST_LINUX_32` go/pkg/linux_386 && \
+  GOOS=linux GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap && \
+  tar -C /usr/local --wildcards -xzf `basename $DIST_LINUX_ARM` go/pkg/linux_arm && \
+  GOOS=linux GOARCH=arm /usr/local/go/pkg/tool/linux_amd64/dist bootstrap && \
   \
-  unzip -d /usr/local -q `basename $DIST_WIN_64` go/pkg/windows_amd64* && \
-  GOOS=windows GOARCH=amd64 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
-  unzip -d /usr/local -q `basename $DIST_WIN_32` go/pkg/windows_386* && \
-  GOOS=windows GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap -v && \
+  tar -C /usr/local --wildcards -xzf `basename $DIST_OSX_64` go/pkg/darwin_amd64 && \
+  GOOS=darwin GOARCH=amd64 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap && \
+  tar -C /usr/local --wildcards -xzf `basename $DIST_OSX_32` go/pkg/darwin_386 && \
+  GOOS=darwin GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap && \
+  \
+  unzip -d /usr/local -q `basename $DIST_WIN_64` go/pkg/windows_amd64/* && \
+  GOOS=windows GOARCH=amd64 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap && \
+  unzip -d /usr/local -q `basename $DIST_WIN_32` go/pkg/windows_386/* && \
+  GOOS=windows GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap && \
   \
   rm -f `basename $DIST_LINUX_64` `basename $DIST_LINUX_32` `basename $DIST_LINUX_ARM` \
     `basename $DIST_OSX_64` `basename $DIST_OSX_32` `basename $DIST_WIN_64` `basename $DIST_WIN_32`
