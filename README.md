@@ -72,7 +72,6 @@ to xgo and if the specific release was already integrated, it will automatically
 be retrieved and installed.
 
     $ xgo -go 1.3.0 github.com/project-iris/iris
-    ...
 
 Since xgo depends on not only the official releases, but also on Dave Cheney's
 ARM packages, there will be a slight delay between official Go updates and the
@@ -80,5 +79,29 @@ xgo updates.
 
 Additionally, a few wildcard release strings are also supported:
 
-  - `-go latest` will use the latest Go release
-  - `-go 1.3.x` will use the latest point release of a specific Go version
+  - `latest` will use the latest Go release
+  - `1.3.x` will use the latest point release of a specific Go version
+
+### Output prefixing
+
+Xgo by default uses the name of the package being cross compiled as the output
+file prefix. This can be overridden with the `-out` flag.
+
+    $ xgo -out iris-v0.3.0 github.com/project-iris/iris
+    ...
+
+    $ ls -al
+    -rwxr-xr-x 1 root     root  3090956 Aug 14 12:39 iris-v0.3.0-darwin-386
+    -rwxr-xr-x 1 root     root  3941068 Aug 14 12:39 iris-v0.3.0-darwin-amd64
+    -rwxr-xr-x 1 root     root  4185224 Aug 14 12:39 iris-v0.3.0-linux-386
+    -rwxr-xr-x 1 root     root  5200960 Aug 14 12:39 iris-v0.3.0-linux-amd64
+    -rwxr-xr-x 1 root     root  4155880 Aug 14 12:39 iris-v0.3.0-linux-arm
+    -rwxr-xr-x 1 root     root  4230144 Aug 14 12:39 iris-v0.3.0-windows-386.exe
+    -rwxr-xr-x 1 root     root  5245952 Aug 14 12:39 iris-v0.3.0-windows-amd64.exe
+
+### Build flags
+
+A handful of flags can be passed to `go build`. The currently supported ones are
+
+  - `-v`: prints the names of packages as they are compiled
+  - `-race`: enables data race detection (supported only on amd64, rest built without)
