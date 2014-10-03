@@ -71,7 +71,7 @@ You can select which Go release to work with through the `-go` command line flag
 to xgo and if the specific release was already integrated, it will automatically
 be retrieved and installed.
 
-    $ xgo -go 1.3.0 github.com/project-iris/iris
+    $ xgo -go 1.3.3 github.com/project-iris/iris
 
 Since xgo depends on not only the official releases, but also on Dave Cheney's
 ARM packages, there will be a slight delay between official Go updates and the
