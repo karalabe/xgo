@@ -10,7 +10,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -102,15 +101,8 @@ func compile(path string, prefix string, verbose bool, race bool) error {
 
 // Executes a command synchronously, redirecting its output to stdout.
 func run(cmd *exec.Cmd) error {
-	if out, err := cmd.StdoutPipe(); err != nil {
-		return err
-	} else {
-		go io.Copy(os.Stdout, out)
-	}
-	if out, err := cmd.StderrPipe(); err != nil {
-		return err
-	} else {
-		go io.Copy(os.Stderr, out)
-	}
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
 	return cmd.Run()
 }
