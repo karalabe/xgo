@@ -111,7 +111,7 @@ RUN \
   echo                                                                                         >> $BUILD && \
   echo 'echo Compiling for linux/arm...'                                                       >> $BUILD && \
   echo 'CC=arm-linux-gnueabi-gcc \\'                                                           >> $BUILD && \
-  echo '  GOOS=linux GOARCH=arm CGO_ENABLED=1 go build $V -o $NAME-linux-arm'                  >> $BUILD && \
+  echo '  GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go build $V -o $NAME-linux-arm'          >> $BUILD && \
   echo                                                                                         >> $BUILD && \
   echo 'echo Compiling for windows/amd64...'                                                   >> $BUILD && \
   echo 'CC=x86_64-w64-mingw32-gcc \\'                                                          >> $BUILD && \
