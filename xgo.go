@@ -80,7 +80,6 @@ func checkDockerImage(image string) (bool, error) {
 // Pulls an image from the docker registry.
 func pullDockerImage(image string) error {
 	fmt.Printf("Pulling %s from docker registry...\n", image)
-	fmt.Printf("Note, this may take some time, but due to a docker bug, progress cannot be displayed.\n")
 	return run(exec.Command("docker", "pull", image))
 }
 
