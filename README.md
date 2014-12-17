@@ -53,13 +53,13 @@ Simply specify the import path you want to build, and xgo will do the rest:
     ...
 
     $ ls -al
-    -rwxr-xr-x  1 root     root  3086860 Aug  7 10:01 iris-darwin-386
-    -rwxr-xr-x  1 root     root  3941068 Aug  7 10:01 iris-darwin-amd64
-    -rwxr-xr-x  1 root     root  4185144 Aug  7 10:01 iris-linux-386
-    -rwxr-xr-x  1 root     root  5196784 Aug  7 10:01 iris-linux-amd64
-    -rwxr-xr-x  1 root     root  4151688 Aug  7 10:01 iris-linux-arm
-    -rwxr-xr-x  1 root     root  4228608 Aug  7 10:01 iris-windows-386.exe
-    -rwxr-xr-x  1 root     root  5243904 Aug  7 10:01 iris-windows-amd64.exe
+    -rwxr-xr-x 1 root     root   5891684 Dec 17 17:27 iris-darwin-386
+    -rwxr-xr-x 1 root     root   7501668 Dec 17 17:27 iris-darwin-amd64
+    -rwxr-xr-x 1 root     root   8116600 Dec 17 17:27 iris-linux-386
+    -rwxr-xr-x 1 root     root  10035096 Dec 17 17:27 iris-linux-amd64
+    -rwxr-xr-x 1 root     root   8053736 Dec 17 17:27 iris-linux-arm
+    -rwxr-xr-x 1 root     root   8194560 Dec 17 17:27 iris-windows-386.exe
+    -rwxr-xr-x 1 root     root  10113536 Dec 17 17:27 iris-windows-amd64.exe
 
 ### Go releases
 
@@ -91,13 +91,13 @@ file prefix. This can be overridden with the `-out` flag.
     ...
 
     $ ls -al
-    -rwxr-xr-x 1 root     root  3090956 Aug 14 12:39 iris-v0.3.0-darwin-386
-    -rwxr-xr-x 1 root     root  3941068 Aug 14 12:39 iris-v0.3.0-darwin-amd64
-    -rwxr-xr-x 1 root     root  4185224 Aug 14 12:39 iris-v0.3.0-linux-386
-    -rwxr-xr-x 1 root     root  5200960 Aug 14 12:39 iris-v0.3.0-linux-amd64
-    -rwxr-xr-x 1 root     root  4155880 Aug 14 12:39 iris-v0.3.0-linux-arm
-    -rwxr-xr-x 1 root     root  4230144 Aug 14 12:39 iris-v0.3.0-windows-386.exe
-    -rwxr-xr-x 1 root     root  5245952 Aug 14 12:39 iris-v0.3.0-windows-amd64.exe
+    -rwxr-xr-x 1 root     root   5891684 Dec 17 17:29 iris-v0.3.2-darwin-386
+    -rwxr-xr-x 1 root     root   7501668 Dec 17 17:29 iris-v0.3.2-darwin-amd64
+    -rwxr-xr-x 1 root     root   8116600 Dec 17 17:29 iris-v0.3.2-linux-386
+    -rwxr-xr-x 1 root     root  10035096 Dec 17 17:29 iris-v0.3.2-linux-amd64
+    -rwxr-xr-x 1 root     root   8053736 Dec 17 17:29 iris-v0.3.2-linux-arm
+    -rwxr-xr-x 1 root     root   8194560 Dec 17 17:29 iris-v0.3.2-windows-386.exe
+    -rwxr-xr-x 1 root     root  10113536 Dec 17 17:29 iris-v0.3.2-windows-amd64.exe
 
 ### Build flags
 
