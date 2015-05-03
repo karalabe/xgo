@@ -21,7 +21,9 @@ var dockerDist = "karalabe/xgo-"
 
 // Command line arguments to fine tune the compilation
 var goVersion = flag.String("go", "latest", "Go release to use for cross compilation")
+var inPackage = flag.String("in", "", "Sub-package to build if not root import")
 var outPrefix = flag.String("out", "", "Prefix to use for output naming (empty = package name)")
+var srcBranch = flag.String("branch", "", "Version control branch to build")
 
 // Command line arguments to pass to go build
 var buildVerbose = flag.Bool("v", false, "Print the names of packages as they are compiled")
@@ -52,7 +54,7 @@ func main() {
 		fmt.Println("found.")
 	}
 	// Cross compile the requested package into the local folder
-	if err := compile(flag.Args()[0], *outPrefix, *buildVerbose, *buildRace); err != nil {
+	if err := compile(flag.Args()[0], *srcBranch, *inPackage, *outPrefix, *buildVerbose, *buildRace); err != nil {
 		log.Fatalf("Failed to cross compile package: %v.", err)
 	}
 }
@@ -84,18 +86,20 @@ func pullDockerImage(image string) error {
 }
 
 // Cross compiles a requested package into the current working directory.
-func compile(path string, prefix string, verbose bool, race bool) error {
+func compile(repo string, branch string, pack string, prefix string, verbose bool, race bool) error {
 	folder, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("Failed to retrieve the working directory: %v.", err)
 	}
-	fmt.Printf("Cross compiling %s...\n", path)
+	fmt.Printf("Cross compiling %s...\n", repo)
 	return run(exec.Command("docker", "run",
 		"-v", folder+":/build",
+		"-e", "BRANCH="+branch,
+		"-e", "PACK="+pack,
 		"-e", "OUT="+prefix,
 		"-e", fmt.Sprintf("FLAG_V=%v", verbose),
 		"-e", fmt.Sprintf("FLAG_RACE=%v", race),
-		dockerDist+*goVersion, path))
+		dockerDist+*goVersion, repo))
 }
 
 // Executes a command synchronously, redirecting its output to stdout.
