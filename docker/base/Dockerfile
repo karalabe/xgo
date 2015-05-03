@@ -85,10 +85,32 @@ ENV	PATH   /usr/local/go/bin:$PATH
 ENV	GOPATH /go
 
 
+# Create a small script to iterate over the dependencies and cross compile them
+ENV BUILD_DEPS /build_deps.sh
+RUN \
+  echo '#!/bin/bash'                                                                                         > $BUILD_DEPS && \
+  echo 'set -e'                                                                                              >> $BUILD_DEPS && \
+  echo                                                                                                       >> $BUILD_DEPS && \
+  echo 'rm -rf /deps-build && cp -r /deps /deps-build'                                                       >> $BUILD_DEPS && \
+  echo 'for dep in `ls /deps-build`; do'                                                                     >> $BUILD_DEPS && \
+  echo '  cd /deps-build/$dep && ./configure --disable-shared --host=$HOST --prefix=$PREFIX && make install' >> $BUILD_DEPS && \
+  echo 'done'                                                                                                >> $BUILD_DEPS && \
+  chmod +x $BUILD_DEPS
+
+
 # Create a small script to go get a package and cross compile it
 ENV BUILD ./build.sh
 RUN \
   echo '#!/bin/bash'                                                                                                            > $BUILD && \
+  echo                                                                                                                         >> $BUILD && \
+  echo 'echo Fetching dependencies...'                                                                                         >> $BUILD && \
+  echo 'mkdir /deps'                                                                                                           >> $BUILD && \
+  echo 'DEPS=($DEPS) && for dep in "${DEPS[@]}"; do'                                                                           >> $BUILD && \
+  echo '  echo Downloading $dep'                                                                                               >> $BUILD && \
+  echo '  if [ "${dep##*.}" == "tar" ]; then wget $dep -O - | tar -C /deps -x; fi'                                             >> $BUILD && \
+  echo '  if [ "${dep##*.}" == "gz" ]; then wget $dep -O - | tar -C /deps -xz; fi'                                             >> $BUILD && \
+  echo '  if [ "${dep##*.}" == "bz2" ]; then wget $dep -O - | tar -C /deps -xj; fi'                                            >> $BUILD && \
+  echo 'done'                                                                                                                  >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
   echo 'echo Fetching $1...'                                                                                                   >> $BUILD && \
   echo 'go get -d $1'                                                                                                          >> $BUILD && \
@@ -112,31 +134,38 @@ RUN \
   echo 'if [ "$FLAG_RACE" == "true" ]; then R=-race; fi'                                                                       >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
   echo 'echo Compiling for linux/amd64...'                                                                                     >> $BUILD && \
+  echo 'HOST=x86_64-linux PREFIX=/usr/local $BUILD_DEPS'                                                                       >> $BUILD && \
   echo 'GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go get -d ./$PACK'                                                               >> $BUILD && \
   echo 'GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build $V $R -o $NAME-linux-amd64$R ./$PACK'                                   >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
   echo 'echo Compiling for linux/386...'                                                                                       >> $BUILD && \
+  echo 'HOST=i686-linux PREFIX=/usr/local $BUILD_DEPS'                                                                         >> $BUILD && \
   echo 'GOOS=linux GOARCH=386 CGO_ENABLED=1 go get -d ./$PACK'                                                                 >> $BUILD && \
   echo 'GOOS=linux GOARCH=386 CGO_ENABLED=1 go build $V -o $NAME-linux-386 ./$PACK'                                            >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
   echo 'echo Compiling for linux/arm...'                                                                                       >> $BUILD && \
+  echo 'CC=arm-linux-gnueabi-gcc HOST=arm-linux PREFIX=/usr/local/arm $BUILD_DEPS'                                             >> $BUILD && \
   echo 'CC=arm-linux-gnueabi-gcc GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go get -d ./$PACK'                                >> $BUILD && \
   echo 'CC=arm-linux-gnueabi-gcc GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go build $V -o $NAME-linux-arm ./$PACK'           >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
   echo 'echo Compiling for windows/amd64...'                                                                                   >> $BUILD && \
+  echo 'CC=x86_64-w64-mingw32-gcc HOST=x86_64-w64-mingw32 PREFIX=/usr/x86_64-w64-mingw32 $BUILD_DEPS'                          >> $BUILD && \
   echo 'CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go get -d ./$PACK'                                   >> $BUILD && \
   echo 'CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build $V $R -o $NAME-windows-amd64$R.exe ./$PACK' >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
   echo 'echo Compiling for windows/386...'                                                                                     >> $BUILD && \
+  echo 'CC=i686-w64-mingw32-gcc HOST=i686-w64-mingw32 PREFIX=/usr/i686-w64-mingw32 $BUILD_DEPS'                                >> $BUILD && \
   echo 'CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 CGO_ENABLED=1 go get -d ./$PACK'                                       >> $BUILD && \
   echo 'CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 CGO_ENABLED=1 go build $V -o $NAME-windows-386.exe ./$PACK'            >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
   echo 'echo Compiling for darwin/amd64...'                                                                                    >> $BUILD && \
   echo '`/osxcross/target/bin/osxcross-env`'                                                                                   >> $BUILD && \
+  echo 'CC=o64-clang HOST=x86_64-darwin PREFIX=/usr/local $BUILD_DEPS'                                                         >> $BUILD && \
   echo 'CC=o64-clang GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go get -d ./$PACK'                                                 >> $BUILD && \
   echo 'CC=o64-clang GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build $V $R -o $NAME-darwin-amd64$R ./$PACK'                    >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
   echo 'echo Compiling for darwin/386...'                                                                                      >> $BUILD && \
+  echo 'CC=o32-clang HOST=i686-darwin PREFIX=/usr/local $BUILD_DEPS'                                                           >> $BUILD && \
   echo 'CC=o32-clang GOOS=darwin GOARCH=386 CGO_ENABLED=1 go get -d ./$PACK'                                                   >> $BUILD && \
   echo 'CC=o32-clang GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build $V -o $NAME-darwin-386 ./$PACK'                             >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
