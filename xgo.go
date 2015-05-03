@@ -21,7 +21,7 @@ var dockerDist = "karalabe/xgo-"
 
 // Command line arguments to fine tune the compilation
 var goVersion = flag.String("go", "latest", "Go release to use for cross compilation")
-var inPackage = flag.String("in", "", "Sub-package to build if not root import")
+var inPackage = flag.String("pkg", "", "Sub-package to build if not root import")
 var outPrefix = flag.String("out", "", "Prefix to use for output naming (empty = package name)")
 var srcBranch = flag.String("branch", "", "Version control branch to build")
 var crossDeps = flag.String("deps", "", "CGO dependencies (configure/make based archives)")

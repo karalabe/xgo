@@ -125,7 +125,7 @@ RUN \
   echo '  fi'                                                                                                                  >> $BUILD && \
   echo 'fi'                                                                                                                    >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
-  echo 'NAME=`basename $1`'                                                                                                    >> $BUILD && \
+  echo 'NAME=`basename $1/$PACK`'                                                                                              >> $BUILD && \
   echo 'if [ "$OUT" != "" ]; then'                                                                                             >> $BUILD && \
   echo '  NAME=$OUT'                                                                                                           >> $BUILD && \
   echo 'fi'                                                                                                                    >> $BUILD && \
