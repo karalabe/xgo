@@ -43,6 +43,7 @@ RUN \
   rm -rf `basename $OSX_SDK_PATH` $OSX_SDK && \
   \
   /osxcross/build.sh
+ENV PATH /osxcross/target/bin:$PATH
 
 
 # Create a small script to download all the Go packages, install the core Linux
@@ -159,13 +160,12 @@ RUN \
   echo 'CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 CGO_ENABLED=1 go build $V -o $NAME-windows-386.exe ./$PACK'            >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
   echo 'echo Compiling for darwin/amd64...'                                                                                    >> $BUILD && \
-  echo '`/osxcross/target/bin/osxcross-env`'                                                                                   >> $BUILD && \
-  echo 'CC=o64-clang HOST=x86_64-darwin PREFIX=/usr/local $BUILD_DEPS'                                                         >> $BUILD && \
+  echo 'CC=o64-clang HOST=x86_64-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS'                                                 >> $BUILD && \
   echo 'CC=o64-clang GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go get -d ./$PACK'                                                 >> $BUILD && \
   echo 'CC=o64-clang GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build $V $R -o $NAME-darwin-amd64$R ./$PACK'                    >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
   echo 'echo Compiling for darwin/386...'                                                                                      >> $BUILD && \
-  echo 'CC=o32-clang HOST=i686-darwin PREFIX=/usr/local $BUILD_DEPS'                                                           >> $BUILD && \
+  echo 'CC=o32-clang HOST=i686-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS'                                                   >> $BUILD && \
   echo 'CC=o32-clang GOOS=darwin GOARCH=386 CGO_ENABLED=1 go get -d ./$PACK'                                                   >> $BUILD && \
   echo 'CC=o32-clang GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build $V -o $NAME-darwin-386 ./$PACK'                             >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
