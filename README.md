@@ -161,7 +161,7 @@ Such dependencies can be added via the `--deps` CLI argument. A complex sample
 for such a scenario is building the Ethereum CLI node, which has the GNU Multiple
 Precision Arithmetic Library as it's dependency.
 
-    $ go run xgo.go --pkg=cmd/geth --branch=develop --deps=https://gmplib.org/download/gmp/gmp-6.0.0a.tar.bz2 github.com/ethereum/go-ethereum
+    $ xgo --pkg=cmd/geth --branch=develop --deps=https://gmplib.org/download/gmp/gmp-6.0.0a.tar.bz2 github.com/ethereum/go-ethereum
     ...
 
     $ ls -al
