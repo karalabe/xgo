@@ -165,7 +165,7 @@ RUN \
   echo 'CC=o64-clang GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build $V $R -o $NAME-darwin-amd64$R ./$PACK'                    >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
   echo 'echo Compiling for darwin/386...'                                                                                      >> $BUILD && \
-  echo 'CC=o32-clang HOST=i686-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS'                                                   >> $BUILD && \
+  echo 'CC=o32-clang HOST=i386-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS'                                                   >> $BUILD && \
   echo 'CC=o32-clang GOOS=darwin GOARCH=386 CGO_ENABLED=1 go get -d ./$PACK'                                                   >> $BUILD && \
   echo 'CC=o32-clang GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build $V -o $NAME-darwin-386 ./$PACK'                             >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
