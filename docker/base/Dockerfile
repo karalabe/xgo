@@ -118,11 +118,21 @@ RUN \
   echo 'cd $GOPATH/src/$1'                                                                                                     >> $BUILD && \
   echo 'export GOPATH=$GOPATH:`pwd`/Godeps/_workspace'                                                                         >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
-  echo 'if [ "$BRANCH" != "" ]; then'                                                                                          >> $BUILD && \
+  echo 'if [ "$REPO_REMOTE" != "" ]; then'                                                                                     >> $BUILD && \
   echo '  if [ -d ".git" ]; then'                                                                                              >> $BUILD && \
-  echo '    git checkout $BRANCH'                                                                                              >> $BUILD && \
+  echo '    git remote set-url origin $REPO_REMOTE'                                                                            >> $BUILD && \
+  echo '    git pull'                                                                                                          >> $BUILD && \
   echo '  elif [ -d ".hg" ]; then'                                                                                             >> $BUILD && \
-  echo '    hg checkout $BRANCH'                                                                                               >> $BUILD && \
+  echo '    echo -e "[paths]\ndefault = $REPO_REMOTE\n" >> .hg/hgrc'                                                           >> $BUILD && \
+  echo '    hg pull'                                                                                                           >> $BUILD && \
+  echo '  fi'                                                                                                                  >> $BUILD && \
+  echo 'fi'                                                                                                                    >> $BUILD && \
+  echo                                                                                                                         >> $BUILD && \
+  echo 'if [ "$REPO_BRANCH" != "" ]; then'                                                                                     >> $BUILD && \
+  echo '  if [ -d ".git" ]; then'                                                                                              >> $BUILD && \
+  echo '    git checkout $REPO_BRANCH'                                                                                         >> $BUILD && \
+  echo '  elif [ -d ".hg" ]; then'                                                                                             >> $BUILD && \
+  echo '    hg checkout $REPO_BRANCH'                                                                                          >> $BUILD && \
   echo '  fi'                                                                                                                  >> $BUILD && \
   echo 'fi'                                                                                                                    >> $BUILD && \
   echo                                                                                                                         >> $BUILD && \
