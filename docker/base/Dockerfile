@@ -26,6 +26,9 @@ RUN \
     clang llvm-dev  libtool libxml2-dev uuid-dev libssl-dev pkg-config \
     patch make xz-utils cpio wget unzip git mercurial --no-install-recommends
 
+RUN apt-get install -y g++-multilib --no-install-recommends
+RUN apt-get install -y g++-mingw-w64 --no-install-recommends
+
 # Configure the container for OSX cross compilation
 ENV OSX_SDK_PATH https://github.com/trevd/android_platform_build2/raw/master/osxsdks10.6.tar.gz
 ENV OSX_SDK      MacOSX10.6.sdk
