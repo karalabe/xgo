@@ -24,7 +24,7 @@ RUN \
   apt-get install -y automake autogen build-essential ca-certificates \
     gcc-arm-linux-gnueabi libc6-dev-armel-cross gcc-multilib gcc-mingw-w64 \
     clang llvm-dev  libtool libxml2-dev uuid-dev libssl-dev pkg-config \
-    patch make xz-utils cpio wget unzip git mercurial --no-install-recommends
+    patch make xz-utils cpio wget unzip git mercurial bzr --no-install-recommends
 
 # Configure the container for OSX cross compilation
 ENV OSX_SDK_PATH https://github.com/trevd/android_platform_build2/raw/master/osxsdks10.6.tar.gz
@@ -32,14 +32,15 @@ ENV OSX_SDK      MacOSX10.6.sdk
 
 RUN \
   git clone https://github.com/tpoechtrager/osxcross.git && \
-  sed -i.bak s/read/#read/g /osxcross/build.sh && \
   \
-  $FETCH $OSX_SDK_PATH f526b4ae9806e8d31e3b094e3f004f8f160a3fad && \
+  $FETCH $OSX_SDK_PATH f526b4ae9806e8d31e3b094e3f004f8f160a3fad
+
+RUN \
   tar -xzf `basename $OSX_SDK_PATH` --strip-components 1 SDKs/$OSX_SDK && \
   tar -cjf /osxcross/tarballs/$OSX_SDK.tar.bz2 $OSX_SDK && \
   rm -rf `basename $OSX_SDK_PATH` $OSX_SDK && \
   \
-  /osxcross/build.sh
+  UNATTENDED=yes /osxcross/build.sh
 ENV PATH /osxcross/target/bin:$PATH
 
 
