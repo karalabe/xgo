@@ -67,6 +67,12 @@ if [ "$FLAG_V" == "true" ]; then V=-v; fi
 if [ "$FLAG_X" == "true" ]; then X=-x; fi
 if [ "$FLAG_RACE" == "true" ]; then R=-race; fi
 
+if [ -n $BEFORE_BUILD ]; then
+	chmod +x /scripts/$BEFORE_BUILD
+	echo "Execute /scripts/$BEFORE_BUILD"
+	/scripts/$BEFORE_BUILD
+fi
+
 # If no build targets were specified, inject a catch all wildcard
 if [ "$TARGETS" == "" ]; then
   TARGETS="./."
