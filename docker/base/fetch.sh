@@ -6,6 +6,12 @@
 # Usage: fetch.sh <remote URL> <SHA1 checksum>
 set -e
 
+# Skip the download if no operands specified
+if [ "$1" == "" -o "$2" == "" ]; then
+  echo "Fetch operands missing, skipping..."
+  exit
+fi
+
 # Pull the file from the remote URL
 file=`basename $1`
 echo "Downloading $1..."
