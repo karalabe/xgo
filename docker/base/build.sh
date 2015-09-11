@@ -64,6 +64,12 @@ if [ "$FLAG_V" == "true" ]; then V=-v; fi
 if [ "$FLAG_RACE" == "true" ]; then R=-race; fi
 
 # Build for each platform individually
+echo "Compiling for android/arm..."
+export ANDROID_SYSROOT=$ANDROID_PLATROOT/$ANDROID_PLATFORM/arch-arm
+CC="arm-linux-androideabi-gcc --sysroot=$ANDROID_SYSROOT" HOST=arm-linux-androideabi PREFIX=$ANDROID_SYSROOT/usr $BUILD_DEPS /deps
+CC=arm-linux-androideabi-gcc GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT"  go get -v -x -d ./$PACK
+CC=arm-linux-androideabi-gcc GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT"  go build -v -x $V $R -o $NAME-android-arm$R ./$PACK
+
 echo "Compiling for linux/amd64..."
 HOST=x86_64-linux PREFIX=/usr/local $BUILD_DEPS /deps
 GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go get -d ./$PACK
@@ -100,4 +106,4 @@ CC=o32-clang GOOS=darwin GOARCH=386 CGO_ENABLED=1 go get -d ./$PACK
 CC=o32-clang GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build -ldflags=-s $V -o $NAME-darwin-386 ./$PACK
 
 echo "Moving binaries to host..."
-cp `ls -t | head -n 7` /build
+cp `ls -t | head -n 8` /build

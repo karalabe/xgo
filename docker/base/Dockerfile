@@ -21,10 +21,11 @@ RUN chmod +x $FETCH
 # Make sure apt-get is up to date and dependent packages are installed
 RUN \
   apt-get update && \
-  apt-get install -y automake autogen build-essential ca-certificates \
+  apt-get install -y automake autogen build-essential ca-certificates      \
     gcc-arm-linux-gnueabi libc6-dev-armel-cross gcc-multilib gcc-mingw-w64 \
-    clang llvm-dev  libtool libxml2-dev uuid-dev libssl-dev pkg-config \
-    patch make xz-utils cpio wget unzip git mercurial bzr --no-install-recommends
+    clang llvm-dev libtool libxml2-dev uuid-dev libssl-dev pkg-config      \
+    patch make xz-utils cpio wget unzip p7zip git mercurial bzr            \
+    --no-install-recommends
 
 # Configure the container for OSX cross compilation
 ENV OSX_SDK_PATH https://github.com/trevd/android_platform_build2/raw/master/osxsdks10.6.tar.gz
@@ -33,15 +34,28 @@ ENV OSX_SDK      MacOSX10.6.sdk
 RUN \
   git clone https://github.com/tpoechtrager/osxcross.git && \
   \
-  $FETCH $OSX_SDK_PATH f526b4ae9806e8d31e3b094e3f004f8f160a3fad
-
-RUN \
+  $FETCH $OSX_SDK_PATH f526b4ae9806e8d31e3b094e3f004f8f160a3fad && \
   tar -xzf `basename $OSX_SDK_PATH` --strip-components 1 SDKs/$OSX_SDK && \
   tar -cjf /osxcross/tarballs/$OSX_SDK.tar.bz2 $OSX_SDK && \
   rm -rf `basename $OSX_SDK_PATH` $OSX_SDK && \
   \
   UNATTENDED=yes /osxcross/build.sh
+
 ENV PATH /osxcross/target/bin:$PATH
+
+# Configure the container for Android cross compilation
+ENV ANDROID_NDK_PATH http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin
+ENV ANDROID_NDK      android-ndk-r10e
+ENV ANDROID_PLATROOT /usr/local/$ANDROID_NDK/platforms/
+ENV ANDROID_PLATFORM android-21
+
+RUN \
+  $FETCH $ANDROID_NDK_PATH c685e5f106f8daa9b5449d0a4f21ee8c0afcb2f6 && \
+  7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/platforms/*/arch-arm/*" -o/usr/local > /dev/null && \
+  7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/arm-linux-androideabi-4.8" -o/usr/local > /dev/null && \
+  rm -rf `basename $ANDROID_NDK_PATH`
+
+ENV PATH /usr/local/$ANDROID_NDK/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/bin:$PATH
 
 
 # Inject the old Go package downloader and tool-chain bootstrapper
