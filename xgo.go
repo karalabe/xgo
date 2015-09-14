@@ -28,7 +28,7 @@ var srcRemote = flag.String("remote", "", "Version control remote repository to 
 var srcBranch = flag.String("branch", "", "Version control branch to build")
 var crossDeps = flag.String("deps", "", "CGO dependencies (configure/make based archives)")
 var targets = flag.String("targets", "*/*", "Comma separated targets to build for")
-var dockerImage = flag.String("image", "", "Use a custom docker image")
+var dockerImage = flag.String("image", "", "Use a custom docker image instead of official distribution")
 
 // Command line arguments to pass to go build
 var buildVerbose = flag.Bool("v", false, "Print the names of packages as they are compiled")
