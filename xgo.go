@@ -10,9 +10,11 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -28,6 +30,8 @@ var srcRemote = flag.String("remote", "", "Version control remote repository to 
 var srcBranch = flag.String("branch", "", "Version control branch to build")
 var crossDeps = flag.String("deps", "", "CGO dependencies (configure/make based archives)")
 var targets = flag.String("targets", "*/*", "Comma separated targets to build for")
+var dockerImage = flag.String("image", "", "Use a custom docker image instead of official distribution")
+var beforeBuildScript = flag.String("before-build", "", "Script to run before the build step")
 
 // Command line arguments to pass to go build
 var buildVerbose = flag.Bool("v", false, "Print the names of packages as they are compiled")
@@ -45,21 +49,27 @@ func main() {
 	if len(flag.Args()) != 1 {
 		log.Fatalf("Usage: %s [options] <go import path>", os.Args[0])
 	}
+
+	image := dockerDist + *goVersion
+	if dockerImage != nil {
+		image = *dockerImage
+	}
+
 	// Check that all required images are available
-	found, err := checkDockerImage(dockerDist + *goVersion)
+	found, err := checkDockerImage(image)
 	switch {
 	case err != nil:
 		log.Fatalf("Failed to check docker image availability: %v.", err)
 	case !found:
 		fmt.Println("not found!")
-		if err := pullDockerImage(dockerDist + *goVersion); err != nil {
+		if err := pullDockerImage(image); err != nil {
 			log.Fatalf("Failed to pull docker image from the registry: %v.", err)
 		}
 	default:
 		fmt.Println("found.")
 	}
 	// Cross compile the requested package into the local folder
-	if err := compile(flag.Args()[0], *srcRemote, *srcBranch, *inPackage, *crossDeps, *outPrefix, *buildVerbose, *buildSteps, *buildRace, strings.Split(*targets, ",")); err != nil {
+	if err := compile(flag.Args()[0], image, *srcRemote, *srcBranch, *inPackage, *crossDeps, *outPrefix, *buildVerbose, *buildSteps, *buildRace, *beforeBuildScript, strings.Split(*targets, ",")); err != nil {
 		log.Fatalf("Failed to cross compile package: %v.", err)
 	}
 }
@@ -91,14 +101,33 @@ func pullDockerImage(image string) error {
 }
 
 // Cross compiles a requested package into the current working directory.
-func compile(repo string, remote string, branch string, pack string, deps string, prefix string, verbose bool, steps bool, race bool, targets []string) error {
+func compile(repo string, image string, remote string, branch string, pack string, deps string, prefix string, verbose bool, steps bool, race bool, beforeBuild string, targets []string) error {
 	folder, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("Failed to retrieve the working directory: %v.", err)
 	}
+
+	tmpDir, err := ioutil.TempDir(folder, "")
+	if err != nil {
+		log.Fatalf("Failed to create temporary directory: %v.", err)
+	}
+	defer func() {
+		err := os.RemoveAll(tmpDir)
+		if err != nil {
+			log.Fatalf("Error removing temporary directory: %v.", err)
+		}
+	}()
+
+	if len(beforeBuild) > 0 {
+		err = os.Link(beforeBuild, filepath.Join(tmpDir, filepath.Base(beforeBuild)))
+		if err != nil {
+			log.Fatalf("Error linking script to temporary dir: %v.", err)
+		}
+	}
 	fmt.Printf("Cross compiling %s...\n", repo)
 	return run(exec.Command("docker", "run",
 		"-v", folder+":/build",
+		"-v", tmpDir+":/scripts",
 		"-e", "REPO_REMOTE="+remote,
 		"-e", "REPO_BRANCH="+branch,
 		"-e", "PACK="+pack,
@@ -107,8 +136,9 @@ func compile(repo string, remote string, branch string, pack string, deps string
 		"-e", fmt.Sprintf("FLAG_V=%v", verbose),
 		"-e", fmt.Sprintf("FLAG_X=%v", steps),
 		"-e", fmt.Sprintf("FLAG_RACE=%v", race),
+		"-e", fmt.Sprintf("BEFORE_BUILD=%v", filepath.Base(beforeBuild)),
 		"-e", "TARGETS="+strings.Replace(strings.Join(targets, " "), "*", ".", -1),
-		dockerDist+*goVersion, repo))
+		image, repo))
 }
 
 // Executes a command synchronously, redirecting its output to stdout.
