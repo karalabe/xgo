@@ -206,13 +206,14 @@ Precision Arithmetic Library as it's dependency.
     ...
 
     $ ls -al
-    -rwxr-xr-x 1 root     root  12605252 May  4 11:32 geth-darwin-386
-    -rwxr-xr-x 1 root     root  14989860 May  4 11:32 geth-darwin-amd64
-    -rwxr-xr-x 1 root     root  17137020 May  4 11:32 geth-linux-386
-    -rwxr-xr-x 1 root     root  20212335 May  4 11:32 geth-linux-amd64
-    -rwxr-xr-x 1 root     root  16475468 May  4 11:32 geth-linux-arm
-    -rwxr-xr-x 1 root     root  16928256 May  4 11:32 geth-windows-386.exe
-    -rwxr-xr-x 1 root     root  19760640 May  4 11:32 geth-windows-amd64.exe
+    -rwxr-xr-x  1 root  root  23213372 Sep 14 17:59 geth-android-21-arm
+    -rwxr-xr-x  1 root  root  14373980 Sep 14 17:59 geth-darwin-386
+    -rwxr-xr-x  1 root  root  17373676 Sep 14 17:59 geth-darwin-amd64
+    -rwxr-xr-x  1 root  root  21098910 Sep 14 17:59 geth-linux-386
+    -rwxr-xr-x  1 root  root  25049693 Sep 14 17:59 geth-linux-amd64
+    -rwxr-xr-x  1 root  root  20578535 Sep 14 17:59 geth-linux-arm
+    -rwxr-xr-x  1 root  root  16351260 Sep 14 17:59 geth-windows-386.exe
+    -rwxr-xr-x  1 root  root  19418071 Sep 14 17:59 geth-windows-amd64.exe
 
 Note, that since xgo needs to cross compile the dependencies for each platform
 and architecture separately, build time can increase significantly.
