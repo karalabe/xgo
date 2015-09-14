@@ -13,6 +13,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 // Cross compilation docker containers
@@ -26,9 +27,11 @@ var outPrefix = flag.String("out", "", "Prefix to use for output naming (empty =
 var srcRemote = flag.String("remote", "", "Version control remote repository to build")
 var srcBranch = flag.String("branch", "", "Version control branch to build")
 var crossDeps = flag.String("deps", "", "CGO dependencies (configure/make based archives)")
+var targets = flag.String("targets", "*/*", "Comma separated targets to build for")
 
 // Command line arguments to pass to go build
 var buildVerbose = flag.Bool("v", false, "Print the names of packages as they are compiled")
+var buildSteps = flag.Bool("x", false, "Print the command as executing the builds")
 var buildRace = flag.Bool("race", false, "Enable data race detection (supported only on amd64)")
 
 func main() {
@@ -56,7 +59,7 @@ func main() {
 		fmt.Println("found.")
 	}
 	// Cross compile the requested package into the local folder
-	if err := compile(flag.Args()[0], *srcRemote, *srcBranch, *inPackage, *crossDeps, *outPrefix, *buildVerbose, *buildRace); err != nil {
+	if err := compile(flag.Args()[0], *srcRemote, *srcBranch, *inPackage, *crossDeps, *outPrefix, *buildVerbose, *buildSteps, *buildRace, strings.Split(*targets, ",")); err != nil {
 		log.Fatalf("Failed to cross compile package: %v.", err)
 	}
 }
@@ -88,7 +91,7 @@ func pullDockerImage(image string) error {
 }
 
 // Cross compiles a requested package into the current working directory.
-func compile(repo string, remote string, branch string, pack string, deps string, prefix string, verbose bool, race bool) error {
+func compile(repo string, remote string, branch string, pack string, deps string, prefix string, verbose bool, steps bool, race bool, targets []string) error {
 	folder, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("Failed to retrieve the working directory: %v.", err)
@@ -102,7 +105,9 @@ func compile(repo string, remote string, branch string, pack string, deps string
 		"-e", "DEPS="+deps,
 		"-e", "OUT="+prefix,
 		"-e", fmt.Sprintf("FLAG_V=%v", verbose),
+		"-e", fmt.Sprintf("FLAG_X=%v", steps),
 		"-e", fmt.Sprintf("FLAG_RACE=%v", race),
+		"-e", "TARGETS="+strings.Replace(strings.Join(targets, " "), "*", ".", -1),
 		dockerDist+*goVersion, repo))
 }
 

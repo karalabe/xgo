@@ -46,16 +46,30 @@ ENV PATH /osxcross/target/bin:$PATH
 # Configure the container for Android cross compilation
 ENV ANDROID_NDK_PATH http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin
 ENV ANDROID_NDK      android-ndk-r10e
-ENV ANDROID_PLATROOT /usr/local/$ANDROID_NDK/platforms/
-ENV ANDROID_PLATFORM android-21
+ENV ANDROID_PLATROOT /usr/local/$ANDROID_NDK/platforms
+ENV ANDROID_PLATFORM 21
 
 RUN \
   $FETCH $ANDROID_NDK_PATH c685e5f106f8daa9b5449d0a4f21ee8c0afcb2f6 && \
   7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/platforms/*/arch-arm/*" -o/usr/local > /dev/null && \
-  7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/arm-linux-androideabi-4.8" -o/usr/local > /dev/null && \
-  rm -rf `basename $ANDROID_NDK_PATH`
+  7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/arm-linux-androideabi-4.9" -o/usr/local > /dev/null && \
+  rm -f `basename $ANDROID_NDK_PATH`
 
-ENV PATH /usr/local/$ANDROID_NDK/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/bin:$PATH
+  # Add these back as further Android support is added to Go
+  #7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/x86-4.9" -o/usr/local > /dev/null && \
+  #7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/mipsel-linux-android-4.9" -o/usr/local > /dev/null && \
+  #7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/aarch64-linux-android-4.9" -o/usr/local > /dev/null && \
+  #7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/x86_64-4.9" -o/usr/local > /dev/null && \
+  #7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/mips64el-linux-android-4.9" -o/usr/local > /dev/null && \
+
+ENV PATH /usr/local/$ANDROID_NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
+
+# Add these back as further Android support is added to Go
+# ENV PATH /usr/local/$ANDROID_NDK/toolchains/x86-4.9/prebuilt/linux-x86_64/bin:$PATH
+# ENV PATH /usr/local/$ANDROID_NDK/toolchains/mipsel-linux-android-4.9/prebuilt/linux-x86_64/bin:$PATH
+# ENV PATH /usr/local/$ANDROID_NDK/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin:$PATH
+# ENV PATH /usr/local/$ANDROID_NDK/toolchains/x86_64-4.9/prebuilt/linux-x86_64/bin:$PATH
+# ENV PATH /usr/local/$ANDROID_NDK/toolchains/mips64el-linux-android-4.9/prebuilt/linux-x86_64/bin:$PATH
 
 
 # Inject the old Go package downloader and tool-chain bootstrapper

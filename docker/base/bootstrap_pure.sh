@@ -8,7 +8,7 @@
 #
 # Needed environment variables:
 #   FETCH          - Remote file fetcher and checksum verifier (injected by image)
-#   ROOT_DIST      - 64 but Linux Go binary distribution package
+#   ROOT_DIST      - 64 bit Linux Go binary distribution package
 #   ROOT_DIST_SHA1 - 64 bit Linux Go distribution package checksum
 set -e
 
@@ -39,7 +39,3 @@ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 CC=o64-clang go install std
 
 echo "Bootstrapping darwin/386..."
 GOOS=darwin GOARCH=386 CGO_ENABLED=1 CC=o32-clang go install std
-
-echo "Bootstrapping android/arm..."
-SYSROOT=$ANDROID_PLATROOT/$ANDROID_PLATFORM/arch-arm
-GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-androideabi-gcc CGO_CFLAGS="--sysroot=$SYSROOT" CGO_LDFLAGS="--sysroot=$SYSROOT" go install std
