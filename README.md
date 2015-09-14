@@ -36,7 +36,7 @@ a single command to compile a Go package to various platforms and architectures.
 ## Installation
 
 Although you could build the container manually, it is available as an automatic
-trusted build from Docker's container registry (~530MB):
+trusted build from Docker's container registry (not insignificant in size):
 
     docker pull karalabe/xgo-latest
 
@@ -53,19 +53,22 @@ Simply specify the import path you want to build, and xgo will do the rest:
     ...
 
     $ ls -al
-    -rwxr-xr-x 1 root     root   6021828 May  4 10:59 iris-darwin-386
-    -rwxr-xr-x 1 root     root   7664428 May  4 10:59 iris-darwin-amd64
-    -rwxr-xr-x 1 root     root   8292432 May  4 10:59 iris-linux-386
-    -rwxr-xr-x 1 root     root  10252920 May  4 10:59 iris-linux-amd64
-    -rwxr-xr-x 1 root     root   8222976 May  4 10:59 iris-linux-arm
-    -rwxr-xr-x 1 root     root   8373248 May  4 10:59 iris-windows-386.exe
-    -rwxr-xr-x 1 root     root  10331648 May  4 10:59 iris-windows-amd64.exe
+    -rwxr-xr-x  1 root  root  10899488 Sep 14 18:05 iris-android-21-arm
+    -rwxr-xr-x  1 root  root   6442188 Sep 14 18:05 iris-darwin-386
+    -rwxr-xr-x  1 root  root   8228756 Sep 14 18:05 iris-darwin-amd64
+    -rwxr-xr-x  1 root  root   9532568 Sep 14 18:05 iris-linux-386
+    -rwxr-xr-x  1 root  root  11776368 Sep 14 18:05 iris-linux-amd64
+    -rwxr-xr-x  1 root  root   9408928 Sep 14 18:05 iris-linux-arm
+    -rwxr-xr-x  1 root  root   7131477 Sep 14 18:05 iris-windows-386.exe
+    -rwxr-xr-x  1 root  root   8963900 Sep 14 18:05 iris-windows-amd64.exe
+
 
 ### Build flags
 
 A handful of flags can be passed to `go build`. The currently supported ones are
 
   - `-v`: prints the names of packages as they are compiled
+  - `-x`: prints the build commands as compilation progresses
   - `-race`: enables data race detection (supported only on amd64, rest built without)
 
 
@@ -79,16 +82,12 @@ You can select which Go release to work with through the `-go` command line flag
 to xgo and if the specific release was already integrated, it will automatically
 be retrieved and installed.
 
-    $ xgo -go 1.4.2 github.com/project-iris/iris
-
-Since xgo depends on not only the official releases, but also on Dave Cheney's
-ARM packages, there will be a slight delay between official Go updates and the
-xgo updates.
+    $ xgo -go 1.5.1 github.com/project-iris/iris
 
 Additionally, a few wildcard release strings are also supported:
 
   - `latest` will use the latest Go release
-  - `1.4.x` will use the latest point release of a specific Go version
+  - `1.5.x` will use the latest point release of a specific Go version
 
 ### Output prefixing
 
@@ -99,13 +98,14 @@ file prefix. This can be overridden with the `-out` flag.
     ...
 
     $ ls -al
-    -rwxr-xr-x 1 root     root   6021828 May  4 11:00 iris-v0.3.2-darwin-386
-    -rwxr-xr-x 1 root     root   7664428 May  4 11:00 iris-v0.3.2-darwin-amd64
-    -rwxr-xr-x 1 root     root   8292432 May  4 11:00 iris-v0.3.2-linux-386
-    -rwxr-xr-x 1 root     root  10252920 May  4 11:00 iris-v0.3.2-linux-amd64
-    -rwxr-xr-x 1 root     root   8222976 May  4 11:00 iris-v0.3.2-linux-arm
-    -rwxr-xr-x 1 root     root   8373248 May  4 11:00 iris-v0.3.2-windows-386.exe
-    -rwxr-xr-x 1 root     root  10331648 May  4 11:00 iris-v0.3.2-windows-amd64.exe
+    -rwxr-xr-x  1 root  root  10899488 Sep 14 18:08 iris-v0.3.2-android-21-arm
+    -rwxr-xr-x  1 root  root   6442188 Sep 14 18:08 iris-v0.3.2-darwin-386
+    -rwxr-xr-x  1 root  root   8228756 Sep 14 18:08 iris-v0.3.2-darwin-amd64
+    -rwxr-xr-x  1 root  root   9532568 Sep 14 18:08 iris-v0.3.2-linux-386
+    -rwxr-xr-x  1 root  root  11776368 Sep 14 18:08 iris-v0.3.2-linux-amd64
+    -rwxr-xr-x  1 root  root   9408928 Sep 14 18:08 iris-v0.3.2-linux-arm
+    -rwxr-xr-x  1 root  root   7131477 Sep 14 18:08 iris-v0.3.2-windows-386.exe
+    -rwxr-xr-x  1 root  root   8963900 Sep 14 18:08 iris-v0.3.2-windows-amd64.exe
 
 ### Package selection
 
@@ -117,16 +117,18 @@ package to build via the `--pkg` flag.
     ...
 
     $ ls -al
-    -rwxr-xr-x 1 root     root  3824276 May  4 11:13 goimports-darwin-386
-    -rwxr-xr-x 1 root     root  4947056 May  4 11:13 goimports-darwin-amd64
-    -rwxr-xr-x 1 root     root  3867592 May  4 11:13 goimports-linux-386
-    -rwxr-xr-x 1 root     root  4992584 May  4 11:13 goimports-linux-amd64
-    -rwxr-xr-x 1 root     root  3880544 May  4 11:13 goimports-linux-arm
-    -rwxr-xr-x 1 root     root  4005376 May  4 11:13 goimports-windows-386.exe
-    -rwxr-xr-x 1 root     root  5145600 May  4 11:13 goimports-windows-amd64.exe
+    -rwxr-xr-x  1 root  root   4924036 Sep 14 18:09 goimports-android-21-arm
+    -rwxr-xr-x  1 root  root   4135776 Sep 14 18:09 goimports-darwin-386
+    -rwxr-xr-x  1 root  root   5182624 Sep 14 18:09 goimports-darwin-amd64
+    -rwxr-xr-x  1 root  root   4184416 Sep 14 18:09 goimports-linux-386
+    -rwxr-xr-x  1 root  root   5254800 Sep 14 18:09 goimports-linux-amd64
+    -rwxr-xr-x  1 root  root   4204440 Sep 14 18:09 goimports-linux-arm
+    -rwxr-xr-x  1 root  root   4343296 Sep 14 18:09 goimports-windows-386.exe
+    -rwxr-xr-x  1 root  root   5409280 Sep 14 18:09 goimports-windows-amd64.exe
 
 This argument may at some point be merged into the import path itself, but for
-now it exists as an independent build parameter.
+now it exists as an independent build parameter. Also, there is not possibility
+for now to build mulitple commands in one go.
 
 ### Branch selection
 
@@ -138,13 +140,46 @@ the desired branch name through the `--branch` argument.
     ...
 
     $ ls -al
-    -rwxr-xr-x 1 root     root  3828396 May  4 11:33 goimports-darwin-386
-    -rwxr-xr-x 1 root     root  4959376 May  4 11:33 goimports-darwin-amd64
-    -rwxr-xr-x 1 root     root  3872736 May  4 11:33 goimports-linux-386
-    -rwxr-xr-x 1 root     root  4997976 May  4 11:33 goimports-linux-amd64
-    -rwxr-xr-x 1 root     root  3885552 May  4 11:33 goimports-linux-arm
-    -rwxr-xr-x 1 root     root  4012032 May  4 11:33 goimports-windows-386.exe
-    -rwxr-xr-x 1 root     root  5153280 May  4 11:33 goimports-windows-amd64.exe
+    -rwxr-xr-x  1 root  root   4928992 Sep 14 18:10 goimports-android-21-arm
+    -rwxr-xr-x  1 root  root   4139868 Sep 14 18:10 goimports-darwin-386
+    -rwxr-xr-x  1 root  root   5186720 Sep 14 18:10 goimports-darwin-amd64
+    -rwxr-xr-x  1 root  root   4189448 Sep 14 18:10 goimports-linux-386
+    -rwxr-xr-x  1 root  root   5264120 Sep 14 18:10 goimports-linux-amd64
+    -rwxr-xr-x  1 root  root   4209400 Sep 14 18:10 goimports-linux-arm
+    -rwxr-xr-x  1 root  root   4348416 Sep 14 18:10 goimports-windows-386.exe
+    -rwxr-xr-x  1 root  root   5415424 Sep 14 18:10 goimports-windows-amd64.exe
+
+### Remote selection
+
+Yet again similarly to `go get`, xgo uses the repository remote corresponding to
+the import path being built. To switch to a different remote while preserving the
+original import path, use the `--remote` argument.
+
+    $ xgo --pkg cmd/goimports --remote github.com/golang/tools golang.org/x/tools
+    ...
+
+### Limit build targets
+
+By default `xgo` will try and build the specified package to all platforms and
+architectures supported by the underlying Go runtime. If you wish to restrict
+the build to only a few target systems, use the comma separated `--targets` CLI
+argument:
+
+  * `--targets=linux/arm`: builds only the ARMv5 Linux binaries
+  * `--targets=windows/*,darwin/*`: builds all Windows and OSX binaries
+  * `--targets=*/arm`: builds ARM binaries for all platforms
+  * `--targets=*/*`: builds all suppoted targets (default)
+
+The Android platform is handled a bit differently currently due to the multitude
+of available platform versions (23 as of writing, some obsolted). As it is mostly
+pointless to build for all possible versions, `xgo` by default builds only against
+the latest release, controllable via a numerical argument after the platform:
+
+  * `--targets=android-16/*`: build all supported architectures for Jelly Bean
+  * `--targets=android-16/arm,android-21/arm`: build for Jelly Bean and Lollipop
+
+Note, `xgo` honors the Android's position independent executables (PIE) security
+requirement, builing all binaries equal and above to Jelly Bean with PIE enabled.
 
 ### CGO dependencies
 

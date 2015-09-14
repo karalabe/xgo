@@ -86,7 +86,7 @@ for TARGET in $TARGETS; do
     if [ $XGOOS == "." ] || [ "$PLATFORM" == "" ] || [ "$PLATFORM" == "." ]; then
       PLATFORM=$ANDROID_PLATFORM
     fi
-    if [ "$PLATFORM" -gt 16 ]; then
+    if [ "$PLATFORM" -ge 16 ]; then
       CGO_CCPIE="-fPIE"
       CGO_LDPIE="-fPIE"
       EXT_LDPIE="-extldflags=-pie"
