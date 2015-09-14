@@ -181,6 +181,12 @@ the latest release, controllable via a numerical argument after the platform:
 Note, `xgo` honors the Android's position independent executables (PIE) security
 requirement, builing all binaries equal and above to Jelly Bean with PIE enabled.
 
+    $ readelf -h iris-android-15-arm | grep Type
+      Type:                              EXEC (Executable file)
+    $ readelf -h iris-android-21-arm | grep Type
+      Type:                              DYN (Shared object file)
+
+
 ### CGO dependencies
 
 The main differentiator of xgo versus other cross compilers is support for basic
