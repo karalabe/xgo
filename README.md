@@ -27,7 +27,7 @@ maintain separate build environments to do it.
 
 ## Enter xgo
 
-My solution to the challenge of cross compiling Go code with embedded C snippets
+My solution to the challenge of cross compiling Go code with embedded C/C++ snippets
 (i.e. CGO_ENABLED=1) is based on the concept of [lightweight Linux containers](http://en.wikipedia.org/wiki/LXC).
 All the necessary Go tool-chains, C cross compilers and platform headers/libraries
 have been assembled into a single Docker container, which can then be called as if
@@ -190,13 +190,13 @@ requirement, builing all binaries equal and above to Jelly Bean with PIE enabled
 ### CGO dependencies
 
 The main differentiator of xgo versus other cross compilers is support for basic
-embedded C code and target-platform specific OS SDK availability. The current xgo
-release introduces an experimental CGO *dependency* cross compilation, enabling
-building Go programs that require external C libraries.
+embedded C/C++ code and target-platform specific OS SDK availability. The current
+xgo release introduces an experimental CGO *dependency* cross compilation, enabling
+building Go programs that require external C/C++ libraries.
 
-It is assumed that the dependent C library is `configure/make` based, was properly
-prepared for cross compilation and is available as a tarball download (`.tar`,
-`.tar.gz` or `.tar.bz2`).
+It is assumed that the dependent C/C++ library is `configure/make` based, was
+properly prepared for cross compilation and is available as a tarball download
+(`.tar`, `.tar.gz` or `.tar.bz2`).
 
 Such dependencies can be added via the `--deps` CLI argument. A complex sample
 for such a scenario is building the Ethereum CLI node, which has the GNU Multiple
