@@ -96,95 +96,16 @@ for TARGET in $TARGETS; do
       if [ "$GO_VERSION" -lt 150 ]; then
         echo "Go version too low, skipping android-$PLATFORM/arm..."
       else
-        export ANDROID_SYSROOT=$ANDROID_PLATROOT/android-$PLATFORM/arch-arm
+        echo "Assembling toolchain for android-$PLATFORM/arm..."
+        $ANDROID_NDK_ROOT/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK_ROOT --install-dir=/usr/$ANDROID_CHAIN_ARM --toolchain=$ANDROID_CHAIN_ARM --arch=arm --system=linux-x86_64
 
         echo "Bootstrapping android-$PLATFORM/arm..."
-        CC=arm-linux-androideabi-gcc GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go install std
+        CC=arm-linux-androideabi-gcc GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go install std
 
         echo "Compiling for android-$PLATFORM/arm..."
-        CC="arm-linux-androideabi-gcc --sysroot=$ANDROID_SYSROOT" HOST=arm-linux-androideabi PREFIX=$ANDROID_SYSROOT/usr $BUILD_DEPS /deps
-        CC=arm-linux-androideabi-gcc GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go get $V $X -d ./$PACK
-        CC=arm-linux-androideabi-gcc GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go build --ldflags="$EXT_LDPIE" $V $X $R -o $NAME-android-$PLATFORM-arm$R ./$PACK
-        builds=$((builds+1))
-      fi
-    fi
-    if ([ $XGOARCH == "." ] || [ $XGOARCH == "386" ]) && [ "$PLATFORM" -ge 9 ]; then
-      if [ "$GO_VERSION" -lt 160 ]; then
-        echo "Go version too low, skipping android-$PLATFORM/386..."
-      else
-        export ANDROID_SYSROOT=$ANDROID_PLATROOT/android-$PLATFORM/arch-x86
-
-        echo "Bootstrapping android-$PLATFORM/386..."
-        CC=i686-linux-android-gcc GOOS=android GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go install std
-
-        echo "Compiling for android-$PLATFORM/386..."
-        CC="i686-linux-android-gcc --sysroot=$ANDROID_SYSROOT" HOST=i686-linux-android PREFIX=$ANDROID_SYSROOT/usr $BUILD_DEPS /deps
-        CC=i686-linux-android-gcc GOOS=android GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go get $V $X -d ./$PACK
-        CC=i686-linux-android-gcc GOOS=android GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go build --ldflags="$EXT_LDPIE" $V $X $R -o $NAME-android-$PLATFORM-386$R ./$PACK
-        builds=$((builds+1))
-      fi
-    fi
-    if ([ $XGOARCH == "." ] || [ $XGOARCH == "mips" ]) && [ "$PLATFORM" -ge 9 ]; then
-      if [ "$GO_VERSION" -lt 160 ]; then
-        echo "Go version too low, skipping android-$PLATFORM/mips..."
-      else
-        export ANDROID_SYSROOT=$ANDROID_PLATROOT/android-$PLATFORM/arch-mips
-
-        echo "Bootstrapping android-$PLATFORM/mips..."
-        CC==mipsel-linux-android-gcc GOOS=android GOARCH=mips CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go install std
-
-        echo "Compiling for android-$PLATFORM/mips..."
-        CC="mipsel-linux-android-gcc --sysroot=$ANDROID_SYSROOT" HOST=mipsel-linux-android PREFIX=$ANDROID_SYSROOT/usr $BUILD_DEPS /deps
-        CC=mipsel-linux-android-gcc GOOS=android GOARCH=mips CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go get $V $X -d ./$PACK
-        CC=mipsel-linux-android-gcc GOOS=android GOARCH=mips CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go build --ldflags="$EXT_LDPIE" $V $X $R -o $NAME-android-$PLATFORM-mips$R ./$PACK
-        builds=$((builds+1))
-      fi
-    fi
-    if ([ $XGOARCH == "." ] || [ $XGOARCH == "arm64" ]) && [ "$PLATFORM" -ge 21 ]; then
-      if [ "$GO_VERSION" -lt 160 ]; then
-        echo "Go version too low, skipping android-$PLATFORM/arm64..."
-      else
-        export ANDROID_SYSROOT=$ANDROID_PLATROOT/android-$PLATFORM/arch-arm64
-
-        echo "Bootstrapping android-$PLATFORM/arm64..."
-        CC===aarch64-linux-android-gcc GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go install std
-
-        echo "Compiling for android-$PLATFORM/arm64..."
-        CC="aarch64-linux-android-gcc --sysroot=$ANDROID_SYSROOT" HOST=aarch64-linux-android PREFIX=$ANDROID_SYSROOT/usr $BUILD_DEPS /deps
-        CC=aarch64-linux-android-gcc GOOS=android GOARCH=arm64 GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go get $V $X -d ./$PACK
-        CC=aarch64-linux-android-gcc GOOS=android GOARCH=arm64 GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go build --ldflags="$EXT_LDPIE" $V $X $R -o $NAME-android-$PLATFORM-arm64$R ./$PACK
-        builds=$((builds+1))
-      fi
-    fi
-    if ([ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]) && [ "$PLATFORM" -ge 21 ]; then
-      if [ "$GO_VERSION" -lt 160 ]; then
-        echo "Go version too low, skipping android-$PLATFORM/amd64..."
-      else
-        export ANDROID_SYSROOT=$ANDROID_PLATROOT/android-$PLATFORM/arch-x86_64
-
-        echo "Bootstrapping android-$PLATFORM/amd64..."
-        CC=x86_64-linux-android-gcc GOOS=android GOARCH=amd64 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go install std
-
-        echo "Compiling for android-$PLATFORM/amd64..."
-        CC="x86_64-linux-android-gcc --sysroot=$ANDROID_SYSROOT" HOST=x86_64-linux-android PREFIX=$ANDROID_SYSROOT/usr $BUILD_DEPS /deps
-        CC=x86_64-linux-android-gcc GOOS=android GOARCH=amd64 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go get $V $X -d ./$PACK
-        CC=x86_64-linux-android-gcc GOOS=android GOARCH=amd64 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go build --ldflags="$EXT_LDPIE" $V $X $R -o $NAME-android-$PLATFORM-amd64$R ./$PACK
-        builds=$((builds+1))
-      fi
-    fi
-    if ([ $XGOARCH == "." ] || [ $XGOARCH == "mips64" ]) && [ "$PLATFORM" -ge 21 ]; then
-      if [ "$GO_VERSION" -lt 160 ]; then
-        echo "Go version too low, skipping android-$PLATFORM/mips64..."
-      else
-        export ANDROID_SYSROOT=$ANDROID_PLATROOT/android-$PLATFORM/arch-mips64
-
-        echo "Bootstrapping android-$PLATFORM/mips64..."
-        CC=mips64el-linux-android-gcc GOOS=android GOARCH=mips64 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go install std
-
-        echo "Compiling for android-$PLATFORM/mips64..."
-        CC="mips64el-linux-android-gcc --sysroot=$ANDROID_SYSROOT" HOST=mips64el-linux-android PREFIX=$ANDROID_SYSROOT/usr $BUILD_DEPS /deps
-        CC=mips64el-linux-android-gcc GOOS=android GOARCH=mips64 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go get $V $X -d ./$PACK
-        CC=mips64el-linux-android-gcc GOOS=android GOARCH=mips64 CGO_ENABLED=1 CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_CCPIE" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT $CGO_LDPIE" go build --ldflags="$EXT_LDPIE" $V $X $R -o $NAME-android-$PLATFORM-mips64$R ./$PACK
+        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ HOST=arm-linux-androideabi PREFIX=/usr/$ANDROID_CHAIN_ARM $BUILD_DEPS /deps
+        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go get $V $X -d ./$PACK
+        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build --ldflags="$EXT_LDPIE" $V $X $R -o $NAME-android-$PLATFORM-arm$R ./$PACK
         builds=$((builds+1))
       fi
     fi
@@ -206,39 +127,39 @@ for TARGET in $TARGETS; do
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "arm" ]); then
     echo "Compiling for linux/arm..."
-    CC=arm-linux-gnueabi-gcc HOST=arm-linux PREFIX=/usr/local/arm $BUILD_DEPS /deps
-    CC=arm-linux-gnueabi-gcc GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go get $V $X -d ./$PACK
-    CC=arm-linux-gnueabi-gcc GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go build $V $X -o $NAME-linux-arm ./$PACK
+    CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ HOST=arm-linux PREFIX=/usr/local/arm $BUILD_DEPS /deps
+    CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go get $V $X -d ./$PACK
+    CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go build $V $X -o $NAME-linux-arm ./$PACK
     builds=$((builds+1))
   fi
   # Check and build for Windows targets
   if ([ $XGOOS == "." ] || [ $XGOOS == "windows" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]); then
     echo "Compiling for windows/amd64..."
-    CC=x86_64-w64-mingw32-gcc HOST=x86_64-w64-mingw32 PREFIX=/usr/x86_64-w64-mingw32 $BUILD_DEPS /deps
-    CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build $V $X $R -o $NAME-windows-amd64$R.exe ./$PACK
+    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ HOST=x86_64-w64-mingw32 PREFIX=/usr/x86_64-w64-mingw32 $BUILD_DEPS /deps
+    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go get $V $X -d ./$PACK
+    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build $V $X $R -o $NAME-windows-amd64$R.exe ./$PACK
     builds=$((builds+1))
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "windows" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "386" ]); then
     echo "Compiling for windows/386..."
-    CC=i686-w64-mingw32-gcc HOST=i686-w64-mingw32 PREFIX=/usr/i686-w64-mingw32 $BUILD_DEPS /deps
-    CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 CGO_ENABLED=1 go build $V $X -o $NAME-windows-386.exe ./$PACK
+    CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ HOST=i686-w64-mingw32 PREFIX=/usr/i686-w64-mingw32 $BUILD_DEPS /deps
+    CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386 CGO_ENABLED=1 go get $V $X -d ./$PACK
+    CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386 CGO_ENABLED=1 go build $V $X -o $NAME-windows-386.exe ./$PACK
     builds=$((builds+1))
   fi
   # Check and build for OSX targets
   if ([ $XGOOS == "." ] || [ $XGOOS == "darwin" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]); then
     echo "Compiling for darwin/amd64..."
-    CC=o64-clang HOST=x86_64-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS /deps
-    CC=o64-clang GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=o64-clang GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -ldflags=-s $V $X $R -o $NAME-darwin-amd64$R ./$PACK
+    CC=o64-clang CXX=o64-clang++ HOST=x86_64-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS /deps
+    CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go get $V $X -d ./$PACK
+    CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -ldflags=-s $V $X $R -o $NAME-darwin-amd64$R ./$PACK
     builds=$((builds+1))
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "darwin" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "386" ]); then
     echo "Compiling for darwin/386..."
-    CC=o32-clang HOST=i386-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS /deps
-    CC=o32-clang GOOS=darwin GOARCH=386 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=o32-clang GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build -ldflags=-s $V $X -o $NAME-darwin-386 ./$PACK
+    CC=o32-clang CXX=o32-clang++ HOST=i386-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS /deps
+    CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go get $V $X -d ./$PACK
+    CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build -ldflags=-s $V $X -o $NAME-darwin-386 ./$PACK
     builds=$((builds+1))
   fi
 done

@@ -22,10 +22,10 @@ RUN chmod +x $FETCH
 RUN \
   apt-get update && \
   apt-get install -y automake autogen build-essential ca-certificates      \
-    gcc-arm-linux-gnueabi libc6-dev-armel-cross gcc-multilib gcc-mingw-w64 \
-    clang llvm-dev libtool libxml2-dev uuid-dev libssl-dev pkg-config      \
-    patch make xz-utils cpio wget unzip p7zip git mercurial bzr            \
-    --no-install-recommends
+    gcc-arm-linux-gnueabi g++-arm-linux-gnueabi libc6-dev-armel-cross      \
+    gcc-multilib g++-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev   \
+    libtool libxml2-dev uuid-dev libssl-dev pkg-config patch make xz-utils \
+    cpio wget unzip p7zip git mercurial bzr --no-install-recommends
 
 # Configure the container for OSX cross compilation
 ENV OSX_SDK_PATH https://github.com/trevd/android_platform_build2/raw/master/osxsdks10.6.tar.gz
@@ -44,33 +44,24 @@ RUN \
 ENV PATH /osxcross/target/bin:$PATH
 
 # Configure the container for Android cross compilation
-ENV ANDROID_NDK_PATH http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin
-ENV ANDROID_NDK      android-ndk-r10e
-ENV ANDROID_PLATROOT /usr/local/$ANDROID_NDK/platforms
-ENV ANDROID_PLATFORM 21
+ENV ANDROID_NDK       android-ndk-r10e
+ENV ANDROID_NDK_PATH  http://dl.google.com/android/ndk/$ANDROID_NDK-linux-x86_64.bin
+ENV ANDROID_NDK_ROOT  /usr/local/$ANDROID_NDK
+ENV ANDROID_PLATFORM  21
+ENV ANDROID_CHAIN_ARM arm-linux-androideabi-4.9
 
 RUN \
   $FETCH $ANDROID_NDK_PATH c685e5f106f8daa9b5449d0a4f21ee8c0afcb2f6 && \
-  7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/platforms/*/arch-arm/*" -o/usr/local > /dev/null && \
-  7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/arm-linux-androideabi-4.9" -o/usr/local > /dev/null && \
+  7zr x `basename $ANDROID_NDK_PATH` \
+    "$ANDROID_NDK/build"                                           \
+    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/include"       \
+    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi*" \
+    "$ANDROID_NDK/prebuilt/linux-x86_64"                           \
+    "$ANDROID_NDK/platforms/*/arch-arm"                            \
+    "$ANDROID_NDK/toolchains/$ANDROID_CHAIN_ARM" -o/usr/local > /dev/null && \
   rm -f `basename $ANDROID_NDK_PATH`
 
-  # Add these back as further Android support is added to Go
-  #7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/x86-4.9" -o/usr/local > /dev/null && \
-  #7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/mipsel-linux-android-4.9" -o/usr/local > /dev/null && \
-  #7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/aarch64-linux-android-4.9" -o/usr/local > /dev/null && \
-  #7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/x86_64-4.9" -o/usr/local > /dev/null && \
-  #7zr x `basename $ANDROID_NDK_PATH` "$ANDROID_NDK/toolchains/mips64el-linux-android-4.9" -o/usr/local > /dev/null && \
-
-ENV PATH /usr/local/$ANDROID_NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
-
-# Add these back as further Android support is added to Go
-# ENV PATH /usr/local/$ANDROID_NDK/toolchains/x86-4.9/prebuilt/linux-x86_64/bin:$PATH
-# ENV PATH /usr/local/$ANDROID_NDK/toolchains/mipsel-linux-android-4.9/prebuilt/linux-x86_64/bin:$PATH
-# ENV PATH /usr/local/$ANDROID_NDK/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin:$PATH
-# ENV PATH /usr/local/$ANDROID_NDK/toolchains/x86_64-4.9/prebuilt/linux-x86_64/bin:$PATH
-# ENV PATH /usr/local/$ANDROID_NDK/toolchains/mips64el-linux-android-4.9/prebuilt/linux-x86_64/bin:$PATH
-
+ENV PATH /usr/$ANDROID_CHAIN_ARM/bin:$PATH
 
 # Inject the old Go package downloader and tool-chain bootstrapper
 ADD bootstrap.sh /bootstrap.sh
