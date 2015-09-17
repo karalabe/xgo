@@ -28,6 +28,7 @@ var srcRemote = flag.String("remote", "", "Version control remote repository to 
 var srcBranch = flag.String("branch", "", "Version control branch to build")
 var crossDeps = flag.String("deps", "", "CGO dependencies (configure/make based archives)")
 var targets = flag.String("targets", "*/*", "Comma separated targets to build for")
+var dockerImage = flag.String("image", "", "Use a custom docker image instead of official distribution")
 
 // Command line arguments to pass to go build
 var buildVerbose = flag.Bool("v", false, "Print the names of packages as they are compiled")
@@ -45,21 +46,27 @@ func main() {
 	if len(flag.Args()) != 1 {
 		log.Fatalf("Usage: %s [options] <go import path>", os.Args[0])
 	}
+
+	image := dockerDist + *goVersion
+	if dockerImage != nil {
+		image = *dockerImage
+	}
+
 	// Check that all required images are available
-	found, err := checkDockerImage(dockerDist + *goVersion)
+	found, err := checkDockerImage(image)
 	switch {
 	case err != nil:
 		log.Fatalf("Failed to check docker image availability: %v.", err)
 	case !found:
 		fmt.Println("not found!")
-		if err := pullDockerImage(dockerDist + *goVersion); err != nil {
+		if err := pullDockerImage(image); err != nil {
 			log.Fatalf("Failed to pull docker image from the registry: %v.", err)
 		}
 	default:
 		fmt.Println("found.")
 	}
 	// Cross compile the requested package into the local folder
-	if err := compile(flag.Args()[0], *srcRemote, *srcBranch, *inPackage, *crossDeps, *outPrefix, *buildVerbose, *buildSteps, *buildRace, strings.Split(*targets, ",")); err != nil {
+	if err := compile(flag.Args()[0], image, *srcRemote, *srcBranch, *inPackage, *crossDeps, *outPrefix, *buildVerbose, *buildSteps, *buildRace, strings.Split(*targets, ",")); err != nil {
 		log.Fatalf("Failed to cross compile package: %v.", err)
 	}
 }
@@ -91,7 +98,7 @@ func pullDockerImage(image string) error {
 }
 
 // Cross compiles a requested package into the current working directory.
-func compile(repo string, remote string, branch string, pack string, deps string, prefix string, verbose bool, steps bool, race bool, targets []string) error {
+func compile(repo string, image string, remote string, branch string, pack string, deps string, prefix string, verbose bool, steps bool, race bool, targets []string) error {
 	folder, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("Failed to retrieve the working directory: %v.", err)
@@ -108,7 +115,7 @@ func compile(repo string, remote string, branch string, pack string, deps string
 		"-e", fmt.Sprintf("FLAG_X=%v", steps),
 		"-e", fmt.Sprintf("FLAG_RACE=%v", race),
 		"-e", "TARGETS="+strings.Replace(strings.Join(targets, " "), "*", ".", -1),
-		dockerDist+*goVersion, repo))
+		image, repo))
 }
 
 // Executes a command synchronously, redirecting its output to stdout.
