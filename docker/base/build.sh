@@ -17,33 +17,44 @@
 #   FLAG_RACE   - Optional race flag to set on the Go builder
 #   TARGETS     - Comma separated list of build targets to compile for
 #   GO_VERSION  - Bootstrapped version of Go to disable uncupported targets
+#   EXT_GOPATH  - GOPATH elements mounted from the host filesystem
 
-# Download the canonical import path (may fail, don't allow failures beyond)
-echo "Fetching main repository $1..."
-go get -d $1
-set -e
+if [ "$EXT_GOPATH" != "" ]; then
+  # If local builds are requested, inject the sources
+  echo "Building locally $1..."
+  export GOPATH=$GOPATH:$EXT_GOPATH
+  set -e
 
-cd $GOPATH/src/$1
-export GOPATH=$GOPATH:`pwd`/Godeps/_workspace
+  # Find and change into the package folder
+  cd `go list -e -f {{.Dir}} $1`
+  export GOPATH=$GOPATH:`pwd`/Godeps/_workspace
+else
+  # Otherwise download the canonical import path (may fail, don't allow failures beyond)
+  echo "Fetching main repository $1..."
+  go get -d $1
+  set -e
 
-# Switch over the code-base to another checkout if requested
-if [ "$REPO_REMOTE" != "" ]; then
-  echo "Switching over to remote $REPO_REMOTE..."
-  if [ -d ".git" ]; then
-    git remote set-url origin $REPO_REMOTE
-    git pull
-  elif [ -d ".hg" ]; then
-    echo -e "[paths]\ndefault = $REPO_REMOTE\n" >> .hg/hgrc
-    hg pull
+  cd $GOPATH/src/$1
+  export GOPATH=$GOPATH:`pwd`/Godeps/_workspace
+
+  # Switch over the code-base to another checkout if requested
+  if [ "$REPO_REMOTE" != "" ]; then
+    echo "Switching over to remote $REPO_REMOTE..."
+    if [ -d ".git" ]; then
+      git remote set-url origin $REPO_REMOTE
+      git pull
+    elif [ -d ".hg" ]; then
+      echo -e "[paths]\ndefault = $REPO_REMOTE\n" >> .hg/hgrc
+      hg pull
+    fi
   fi
-fi
-
-if [ "$REPO_BRANCH" != "" ]; then
-  echo "Switching over to branch $REPO_BRANCH..."
-  if [ -d ".git" ]; then
-    git checkout $REPO_BRANCH
-  elif [ -d ".hg" ]; then
-    hg checkout $REPO_BRANCH
+  if [ "$REPO_BRANCH" != "" ]; then
+    echo "Switching over to branch $REPO_BRANCH..."
+    if [ -d ".git" ]; then
+      git checkout $REPO_BRANCH
+    elif [ -d ".hg" ]; then
+      hg checkout $REPO_BRANCH
+    fi
   fi
 fi
 
@@ -73,7 +84,6 @@ if [ "$TARGETS" == "" ]; then
 fi
 
 # Build for each requested platform individually
-builds=0
 for TARGET in $TARGETS; do
   # Split the target into platform and architecture
   XGOOS=`echo $TARGET | cut -d '/' -f 1`
@@ -103,10 +113,9 @@ for TARGET in $TARGETS; do
         CC=arm-linux-androideabi-gcc GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go install std
 
         echo "Compiling for android-$PLATFORM/arm..."
-        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ HOST=arm-linux-androideabi PREFIX=/usr/$ANDROID_CHAIN_ARM $BUILD_DEPS /deps
+        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ HOST=arm-linux-androideabi PREFIX=/usr/$ANDROID_CHAIN_ARM/arm-linux-androideabi $BUILD_DEPS /deps
         CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go get $V $X -d ./$PACK
-        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build --ldflags="$EXT_LDPIE" $V $X $R -o $NAME-android-$PLATFORM-arm$R ./$PACK
-        builds=$((builds+1))
+        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build --ldflags="$EXT_LDPIE" $V $X $R -o /build/$NAME-android-$PLATFORM-arm$R ./$PACK
       fi
     fi
   fi
@@ -115,58 +124,44 @@ for TARGET in $TARGETS; do
     echo "Compiling for linux/amd64..."
     HOST=x86_64-linux PREFIX=/usr/local $BUILD_DEPS /deps
     GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build $V $X $R -o $NAME-linux-amd64$R ./$PACK
-    builds=$((builds+1))
+    GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build $V $X $R -o /build/$NAME-linux-amd64$R ./$PACK
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "386" ]); then
     echo "Compiling for linux/386..."
     HOST=i686-linux PREFIX=/usr/local $BUILD_DEPS /deps
     GOOS=linux GOARCH=386 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    GOOS=linux GOARCH=386 CGO_ENABLED=1 go build $V $X -o $NAME-linux-386 ./$PACK
-    builds=$((builds+1))
+    GOOS=linux GOARCH=386 CGO_ENABLED=1 go build $V $X -o /build/$NAME-linux-386 ./$PACK
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "arm" ]); then
     echo "Compiling for linux/arm..."
     CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ HOST=arm-linux PREFIX=/usr/local/arm $BUILD_DEPS /deps
     CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go get $V $X -d ./$PACK
-    CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go build $V $X -o $NAME-linux-arm ./$PACK
-    builds=$((builds+1))
+    CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go build $V $X -o /build/$NAME-linux-arm ./$PACK
   fi
   # Check and build for Windows targets
   if ([ $XGOOS == "." ] || [ $XGOOS == "windows" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]); then
     echo "Compiling for windows/amd64..."
     CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ HOST=x86_64-w64-mingw32 PREFIX=/usr/x86_64-w64-mingw32 $BUILD_DEPS /deps
     CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build $V $X $R -o $NAME-windows-amd64$R.exe ./$PACK
-    builds=$((builds+1))
+    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build $V $X $R -o /build/$NAME-windows-amd64$R.exe ./$PACK
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "windows" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "386" ]); then
     echo "Compiling for windows/386..."
     CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ HOST=i686-w64-mingw32 PREFIX=/usr/i686-w64-mingw32 $BUILD_DEPS /deps
     CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386 CGO_ENABLED=1 go build $V $X -o $NAME-windows-386.exe ./$PACK
-    builds=$((builds+1))
+    CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386 CGO_ENABLED=1 go build $V $X -o /build/$NAME-windows-386.exe ./$PACK
   fi
   # Check and build for OSX targets
   if ([ $XGOOS == "." ] || [ $XGOOS == "darwin" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]); then
     echo "Compiling for darwin/amd64..."
     CC=o64-clang CXX=o64-clang++ HOST=x86_64-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS /deps
     CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -ldflags=-s $V $X $R -o $NAME-darwin-amd64$R ./$PACK
-    builds=$((builds+1))
+    CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -ldflags=-s $V $X $R -o /build/$NAME-darwin-amd64$R ./$PACK
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "darwin" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "386" ]); then
     echo "Compiling for darwin/386..."
     CC=o32-clang CXX=o32-clang++ HOST=i386-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS /deps
     CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build -ldflags=-s $V $X -o $NAME-darwin-386 ./$PACK
-    builds=$((builds+1))
+    CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build -ldflags=-s $V $X -o /build/$NAME-darwin-386 ./$PACK
   fi
 done
-
-if [ "$builds" -eq 0 ]; then
-  echo "No build targets matched!"
-else
-  echo "Moving $builds binaries to host..."
-  cp `ls -t | head -n $builds` /build
-fi

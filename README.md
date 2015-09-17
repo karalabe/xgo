@@ -62,6 +62,10 @@ Simply specify the import path you want to build, and xgo will do the rest:
     -rwxr-xr-x  1 root  root   7131477 Sep 14 18:05 iris-windows-386.exe
     -rwxr-xr-x  1 root  root   8963900 Sep 14 18:05 iris-windows-amd64.exe
 
+If the path is not a canonical import path, but rather a local path (starts with
+a dot `.` or a dash `/`), xgo will use the local GOPATH contents for the cross
+compilation.
+
 
 ### Build flags
 
