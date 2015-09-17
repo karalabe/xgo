@@ -100,6 +100,8 @@ for TARGET in $TARGETS; do
       CGO_CCPIE="-fPIE"
       CGO_LDPIE="-fPIE"
       EXT_LDPIE="-extldflags=-pie"
+    else
+      unset CGO_CCPIE CGO_LDPIE EXT_LDPIE
     fi
     # Iterate over the requested architectures, bootstrap and
     if [ $XGOARCH == "." ] || [ $XGOARCH == "arm" ]; then
@@ -107,7 +109,7 @@ for TARGET in $TARGETS; do
         echo "Go version too low, skipping android-$PLATFORM/arm..."
       else
         echo "Assembling toolchain for android-$PLATFORM/arm..."
-        $ANDROID_NDK_ROOT/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK_ROOT --install-dir=/usr/$ANDROID_CHAIN_ARM --toolchain=$ANDROID_CHAIN_ARM --arch=arm --system=linux-x86_64
+        $ANDROID_NDK_ROOT/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK_ROOT --install-dir=/usr/$ANDROID_CHAIN_ARM --toolchain=$ANDROID_CHAIN_ARM --arch=arm --system=linux-x86_64 > /dev/null 2>&1
 
         echo "Bootstrapping android-$PLATFORM/arm..."
         CC=arm-linux-androideabi-gcc GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go install std
