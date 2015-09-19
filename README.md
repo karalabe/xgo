@@ -111,36 +111,13 @@ file prefix. This can be overridden with the `-out` flag.
     -rwxr-xr-x  1 root  root   7131477 Sep 14 18:08 iris-v0.3.2-windows-386.exe
     -rwxr-xr-x  1 root  root   8963900 Sep 14 18:08 iris-v0.3.2-windows-amd64.exe
 
-### Package selection
-
-If the project you are cross compiling is not a single executable, but rather a
-larger project containing multiple commands, you can select the specific sub-
-package to build via the `--pkg` flag.
-
-    $ xgo --pkg cmd/goimports golang.org/x/tools
-    ...
-
-    $ ls -al
-    -rwxr-xr-x  1 root  root   4924036 Sep 14 18:09 goimports-android-21-arm
-    -rwxr-xr-x  1 root  root   4135776 Sep 14 18:09 goimports-darwin-386
-    -rwxr-xr-x  1 root  root   5182624 Sep 14 18:09 goimports-darwin-amd64
-    -rwxr-xr-x  1 root  root   4184416 Sep 14 18:09 goimports-linux-386
-    -rwxr-xr-x  1 root  root   5254800 Sep 14 18:09 goimports-linux-amd64
-    -rwxr-xr-x  1 root  root   4204440 Sep 14 18:09 goimports-linux-arm
-    -rwxr-xr-x  1 root  root   4343296 Sep 14 18:09 goimports-windows-386.exe
-    -rwxr-xr-x  1 root  root   5409280 Sep 14 18:09 goimports-windows-amd64.exe
-
-This argument may at some point be merged into the import path itself, but for
-now it exists as an independent build parameter. Also, there is not possibility
-for now to build mulitple commands in one go.
-
 ### Branch selection
 
 Similarly to `go get`, xgo also uses the `master` branch of a repository during
 source code retrieval. To switch to a different branch before compilation pass
 the desired branch name through the `--branch` argument.
 
-    $ xgo --pkg cmd/goimports --branch release-branch.go1.4 golang.org/x/tools
+    $ xgo --branch release-branch.go1.4 golang.org/x/tools/cmd/goimports
     ...
 
     $ ls -al
@@ -159,8 +136,34 @@ Yet again similarly to `go get`, xgo uses the repository remote corresponding to
 the import path being built. To switch to a different remote while preserving the
 original import path, use the `--remote` argument.
 
-    $ xgo --pkg cmd/goimports --remote github.com/golang/tools golang.org/x/tools
+    $ xgo --remote github.com/golang/tools golang.org/x/tools/cmd/goimports
     ...
+
+### Package selection
+
+If you used the above *branch* or *remote* selection machanisms, it may happen
+that the path you are trying to build is only present in the specific branch and
+not the default respoitory, causing Go to fail at locating it. To circumvent this,
+you may specify only the repository root for xgo, and use an additional `--pkg`
+parameter to select the exact package within, honoring any prior *branch* and
+*remote* selections.
+
+    $ xgo --pkg cmd/goimports golang.org/x/tools
+    ...
+
+    $ ls -al
+    -rwxr-xr-x  1 root  root   4924036 Sep 14 18:09 goimports-android-21-arm
+    -rwxr-xr-x  1 root  root   4135776 Sep 14 18:09 goimports-darwin-386
+    -rwxr-xr-x  1 root  root   5182624 Sep 14 18:09 goimports-darwin-amd64
+    -rwxr-xr-x  1 root  root   4184416 Sep 14 18:09 goimports-linux-386
+    -rwxr-xr-x  1 root  root   5254800 Sep 14 18:09 goimports-linux-amd64
+    -rwxr-xr-x  1 root  root   4204440 Sep 14 18:09 goimports-linux-arm
+    -rwxr-xr-x  1 root  root   4343296 Sep 14 18:09 goimports-windows-386.exe
+    -rwxr-xr-x  1 root  root   5409280 Sep 14 18:09 goimports-windows-amd64.exe
+
+This argument may at some point be integrated into the import path itself, but for
+now it exists as an independent build parameter. Also, there is not possibility
+for now to build mulitple commands in one go.
 
 ### Limit build targets
 
@@ -200,13 +203,18 @@ building Go programs that require external C/C++ libraries.
 
 It is assumed that the dependent C/C++ library is `configure/make` based, was
 properly prepared for cross compilation and is available as a tarball download
-(`.tar`, `.tar.gz` or `.tar.bz2`).
+(`.tar`, `.tar.gz` or `.tar.bz2`). Further plans include extending this to cmake
+based projects, if need arises (please open an issue if it's important to you).
 
-Such dependencies can be added via the `--deps` CLI argument. A complex sample
-for such a scenario is building the Ethereum CLI node, which has the GNU Multiple
-Precision Arithmetic Library as it's dependency.
+Such dependencies can be added via the `--deps` argument. They will be retrieved
+prior to starting the cross compilation and the packages cached to save bandwidth
+on subsequent calls.
 
-    $ xgo --pkg=cmd/geth --branch=develop --deps=https://gmplib.org/download/gmp/gmp-6.0.0a.tar.bz2 github.com/ethereum/go-ethereum
+A complex sample for such a scenario is building the Ethereum CLI node, which has
+the GNU Multiple Precision Arithmetic Library as it's dependency.
+
+    $ xgo --deps=https://gmplib.org/download/gmp/gmp-6.0.0a.tar.bz2 \
+        --branch=develop github.com/ethereum/go-ethereum/cmd/geth
     ...
 
     $ ls -al
