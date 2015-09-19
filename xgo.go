@@ -11,13 +11,18 @@ import (
 	"flag"
 	"fmt"
 	"go/build"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 )
+
+// Path where to cache external dependencies
+var depsCache = filepath.Join(os.TempDir(), "xgo-cache")
 
 // Cross compilation docker containers
 var dockerBase = "karalabe/xgo-base"
@@ -68,6 +73,41 @@ func main() {
 		}
 	default:
 		fmt.Println("found.")
+	}
+	// Cache all external dependencies to prevent always hitting the internet
+	if *crossDeps != "" {
+		if err := os.MkdirAll(depsCache, 751); err != nil {
+			log.Fatalf("Failed to create dependency cache: %v.", err)
+		}
+		// Download all missing dependencies
+		for _, dep := range strings.Split(*crossDeps, " ") {
+			if url := strings.TrimSpace(dep); len(url) > 0 {
+				path := filepath.Join(depsCache, filepath.Base(url))
+
+				if _, err := os.Stat(path); err != nil {
+					fmt.Printf("Downloading new dependency: %s...\n", url)
+
+					out, err := os.Create(path)
+					if err != nil {
+						log.Fatalf("Failed to create dependency file: %v.", err)
+					}
+					res, err := http.Get(url)
+					if err != nil {
+						log.Fatalf("Failed to retrieve dependency: %v.", err)
+					}
+					defer res.Body.Close()
+
+					if _, err := io.Copy(out, res.Body); err != nil {
+						log.Fatalf("Failed to download dependency: %v", err)
+					}
+					out.Close()
+
+					fmt.Printf("New dependency cached: %s.\n", path)
+				} else {
+					fmt.Printf("Dependency already cached: %s.\n", path)
+				}
+			}
+		}
 	}
 	// Cross compile the requested package into the local folder
 	if err := compile(flag.Args()[0], image, *srcRemote, *srcBranch, *inPackage, *crossDeps, *outPrefix, *buildVerbose, *buildSteps, *buildRace, strings.Split(*targets, ",")); err != nil {
@@ -139,6 +179,7 @@ func compile(repo string, image string, remote string, branch string, pack strin
 	args := []string{
 		"run",
 		"-v", folder + ":/build",
+		"-v", depsCache + ":/deps-cache:ro",
 		"-e", "REPO_REMOTE=" + remote,
 		"-e", "REPO_BRANCH=" + branch,
 		"-e", "PACK=" + pack,
