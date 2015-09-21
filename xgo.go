@@ -167,10 +167,36 @@ func compile(repo string, image string, remote string, branch string, pack strin
 		repo = pack.ImportPath
 
 		// Iterate over all the local libs and export the mount points
-		for i, gopath := range strings.Split(os.Getenv("GOPATH"), string(os.PathListSeparator)) {
-			locals = append(locals, filepath.Join(gopath, "src"))
-			mounts = append(mounts, filepath.Join("/ext-go", strconv.Itoa(i), "src"))
-			paths = append(paths, filepath.Join("/ext-go", strconv.Itoa(i)))
+		for _, gopath := range strings.Split(os.Getenv("GOPATH"), string(os.PathListSeparator)) {
+			// Since docker sandboxes volumes, resolve any symlinks manually
+			sources := filepath.Join(gopath, "src")
+			filepath.Walk(sources, func(path string, info os.FileInfo, err error) error {
+				// Skip anything that's not a symlink
+				if info.Mode()&os.ModeSymlink == 0 {
+					return nil
+				}
+				// Resolve the symlink and skip if it's not a folder
+				target, err := filepath.EvalSymlinks(path)
+				if err != nil {
+					return nil
+				}
+				if info, err = os.Stat(target); err != nil || !info.IsDir() {
+					return nil
+				}
+				// Skip if the symlink points within GOPATH
+				if filepath.HasPrefix(target, sources) {
+					return nil
+				}
+				// Folder needs explicit mounting due to docker symlink security
+				locals = append(locals, target)
+				mounts = append(mounts, filepath.Join("/ext-go", strconv.Itoa(len(locals)), "src", strings.TrimPrefix(path, sources)))
+				paths = append(paths, filepath.Join("/ext-go", strconv.Itoa(len(locals))))
+				return nil
+			})
+			// Export the main mount point for this GOPATH entry
+			locals = append(locals, sources)
+			mounts = append(mounts, filepath.Join("/ext-go", strconv.Itoa(len(locals)), "src"))
+			paths = append(paths, filepath.Join("/ext-go", strconv.Itoa(len(locals))))
 		}
 	}
 	// Assemble and run the cross compilation command
