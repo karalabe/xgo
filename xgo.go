@@ -33,6 +33,7 @@ var (
 	goVersion   = flag.String("go", "latest", "Go release to use for cross compilation")
 	inPackage   = flag.String("pkg", "", "Sub-package to build if not root import")
 	outPrefix   = flag.String("out", "", "Prefix to use for output naming (empty = package name)")
+	outFolder   = flag.String("dest", "", "Destination folder to put binaries in (empty = current)")
 	srcRemote   = flag.String("remote", "", "Version control remote repository to build")
 	srcBranch   = flag.String("branch", "", "Version control branch to build")
 	crossDeps   = flag.String("deps", "", "CGO dependencies (configure/make based archives)")
@@ -110,7 +111,7 @@ func main() {
 		}
 	}
 	// Cross compile the requested package into the local folder
-	if err := compile(flag.Args()[0], image, *srcRemote, *srcBranch, *inPackage, *crossDeps, *outPrefix, *buildVerbose, *buildSteps, *buildRace, strings.Split(*targets, ",")); err != nil {
+	if err := compile(flag.Args()[0], image, *srcRemote, *srcBranch, *inPackage, *crossDeps, *outFolder, *outPrefix, *buildVerbose, *buildSteps, *buildRace, strings.Split(*targets, ",")); err != nil {
 		log.Fatalf("Failed to cross compile package: %v.", err)
 	}
 }
@@ -142,11 +143,17 @@ func pullDockerImage(image string) error {
 }
 
 // Cross compiles a requested package into the current working directory.
-func compile(repo string, image string, remote string, branch string, pack string, deps string, prefix string, verbose bool, steps bool, race bool, targets []string) error {
+func compile(repo string, image string, remote string, branch string, pack string, deps string, dest string, prefix string, verbose bool, steps bool, race bool, targets []string) error {
 	// Retrieve the current folder to store the binaries in
 	folder, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("Failed to retrieve the working directory: %v.", err)
+	}
+	if dest != "" {
+		folder, err = filepath.Abs(dest)
+		if err != nil {
+			log.Fatalf("Failed to resolve destination path (%s): %v.", dest, err)
+		}
 	}
 	// If a local build was requested, find the import path and mount all GOPATH sources
 	locals, mounts, paths := []string{}, []string{}, []string{}
