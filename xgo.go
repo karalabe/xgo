@@ -174,6 +174,9 @@ func compile(repo string, image string, remote string, branch string, pack strin
 		repo = pack.ImportPath
 
 		// Iterate over all the local libs and export the mount points
+		if os.Getenv("GOPATH") == "" {
+			log.Fatalf("No $GOPATH is set or forwarded to xgo")
+		}
 		for _, gopath := range strings.Split(os.Getenv("GOPATH"), string(os.PathListSeparator)) {
 			// Since docker sandboxes volumes, resolve any symlinks manually
 			sources := filepath.Join(gopath, "src")
