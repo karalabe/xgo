@@ -29,13 +29,20 @@ if [ "$EXT_GOPATH" != "" ]; then
   cd `go list -e -f {{.Dir}} $1`
   export GOPATH=$GOPATH:`pwd`/Godeps/_workspace
 else
+  # Inject all possible Godep paths to short circuit go gets
+  GOPATH_ROOT=$GOPATH/src
+  IMPORT_PATH=$1
+  while [ "$IMPORT_PATH" != "." ]; do
+    export GOPATH=$GOPATH:$GOPATH_ROOT/$IMPORT_PATH/Godeps/_workspace
+    IMPORT_PATH=`dirname $IMPORT_PATH`
+  done
+
   # Otherwise download the canonical import path (may fail, don't allow failures beyond)
   echo "Fetching main repository $1..."
-  go get -d $1
+  go get -v -d $1
   set -e
 
-  cd $GOPATH/src/$1
-  export GOPATH=$GOPATH:`pwd`/Godeps/_workspace
+  cd $GOPATH_ROOT/$1
 
   # Switch over the code-base to another checkout if requested
   if [ "$REPO_REMOTE" != "" ]; then
