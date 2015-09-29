@@ -181,6 +181,11 @@ func compile(repo string, image string, remote string, branch string, pack strin
 			// Since docker sandboxes volumes, resolve any symlinks manually
 			sources := filepath.Join(gopath, "src")
 			filepath.Walk(sources, func(path string, info os.FileInfo, err error) error {
+				// Skip any folders that errored out
+				if err != nil {
+					log.Printf("Failed to access GOPATH element %s: %v", path, err)
+					return nil
+				}
 				// Skip anything that's not a symlink
 				if info.Mode()&os.ModeSymlink == 0 {
 					return nil
