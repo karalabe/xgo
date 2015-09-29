@@ -45,22 +45,40 @@ else
   cd $GOPATH_ROOT/$1
 
   # Switch over the code-base to another checkout if requested
-  if [ "$REPO_REMOTE" != "" ]; then
-    echo "Switching over to remote $REPO_REMOTE..."
-    if [ -d ".git" ]; then
-      git remote set-url origin $REPO_REMOTE
-      git pull
-    elif [ -d ".hg" ]; then
-      echo -e "[paths]\ndefault = $REPO_REMOTE\n" >> .hg/hgrc
-      hg pull
+  if [ "$REPO_REMOTE" != "" ] || [ "$REPO_BRANCH" != "" ]; then
+    # Detect the version control system type
+    IMPORT_PATH=$1
+    while [ "$IMPORT_PATH" != "." ] && [ "$REPO_TYPE" == "" ]; do
+      if [ -d "$GOPATH_ROOT/$IMPORT_PATH/.git" ]; then
+        REPO_TYPE="git"
+      elif  [ -d "$GOPATH_ROOT/$IMPORT_PATH/.hg" ]; then
+        REPO_TYPE="hg"
+      fi
+      IMPORT_PATH=`dirname $IMPORT_PATH`
+    done
+
+    if [ "$REPO_TYPE" == "" ]; then
+      echo "Unknown version control system type, cannot switch remotes and branches."
+      exit -1
     fi
-  fi
-  if [ "$REPO_BRANCH" != "" ]; then
-    echo "Switching over to branch $REPO_BRANCH..."
-    if [ -d ".git" ]; then
-      git checkout $REPO_BRANCH
-    elif [ -d ".hg" ]; then
-      hg checkout $REPO_BRANCH
+    # If we have a valid VCS, execute the switch operations
+    if [ "$REPO_REMOTE" != "" ]; then
+      echo "Switching over to remote $REPO_REMOTE..."
+      if [ "$REPO_TYPE" == "git" ]; then
+        git remote set-url origin $REPO_REMOTE
+        git pull
+      elif [ "$REPO_TYPE" == "hg" ]; then
+        echo -e "[paths]\ndefault = $REPO_REMOTE\n" >> .hg/hgrc
+        hg pull
+      fi
+    fi
+    if [ "$REPO_BRANCH" != "" ]; then
+      echo "Switching over to branch $REPO_BRANCH..."
+      if [ "$REPO_TYPE" == "git" ]; then
+        git checkout $REPO_BRANCH
+      elif [ "$REPO_TYPE" == "hg" ]; then
+        hg checkout $REPO_BRANCH
+      fi
     fi
   fi
 fi
