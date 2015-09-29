@@ -210,7 +210,7 @@ func compile(repo string, image string, remote string, branch string, pack strin
 	fmt.Printf("Cross compiling %s...\n", repo)
 
 	args := []string{
-		"run",
+		"run", "--rm",
 		"-v", folder + ":/build",
 		"-v", depsCache + ":/deps-cache:ro",
 		"-e", "REPO_REMOTE=" + remote,
