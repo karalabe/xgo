@@ -39,10 +39,3 @@ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 CC=o64-clang go install std
 
 echo "Bootstrapping darwin/386..."
 GOOS=darwin GOARCH=386 CGO_ENABLED=1 CC=o32-clang go install std
-
-echo "Bootstrapping android/arm..."
-ANDROID_SYSROOT=$ANDROID_NDK_ROOT/platforms/android-$ANDROID_PLATFORM/arch-arm
-ANDROID_BINARIES=$ANDROID_NDK_ROOT/toolchains/$ANDROID_CHAIN_ARM/prebuilt/linux-x86_64/bin
-
-PATH=$ANDROID_BINARIES:$PATH CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 \
-  CGO_CFLAGS="--sysroot=$ANDROID_SYSROOT" CGO_CXXFLAGS="--sysroot=$ANDROID_SYSROOT" CGO_LDFLAGS="--sysroot=$ANDROID_SYSROOT" go install std
