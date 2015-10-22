@@ -122,7 +122,7 @@ for TARGET in $TARGETS; do
     if [ "$PLATFORM" -ge 16 ]; then
       CGO_CCPIE="-fPIE"
       CGO_LDPIE="-fPIE"
-      EXT_LDPIE="-extldflags=-pie"
+      EXT_LDPIE="-extldflags=-pie -extldflags=-Wl,--allow-multiple-definition"
     else
       unset CGO_CCPIE CGO_LDPIE EXT_LDPIE
     fi
