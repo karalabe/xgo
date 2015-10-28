@@ -42,9 +42,22 @@ var (
 )
 
 // Command line arguments to pass to go build
-var buildVerbose = flag.Bool("v", false, "Print the names of packages as they are compiled")
-var buildSteps = flag.Bool("x", false, "Print the command as executing the builds")
-var buildRace = flag.Bool("race", false, "Enable data race detection (supported only on amd64)")
+var (
+	buildVerbose = flag.Bool("v", false, "Print the names of packages as they are compiled")
+	buildSteps   = flag.Bool("x", false, "Print the command as executing the builds")
+	buildRace    = flag.Bool("race", false, "Enable data race detection (supported only on amd64)")
+	buildTags    = flag.String("tags", "", "List of build tags to consider satisfied during the build")
+	buildLdFlags = flag.String("ldflags", "", "Arguments to pass on each go tool link invocation")
+)
+
+// BuildFlags is a simple collection of flags to fine tune a build.
+type BuildFlags struct {
+	Verbose bool   // Print the names of packages as they are compiled
+	Steps   bool   // Print the command as executing the builds
+	Race    bool   // Enable data race detection (supported only on amd64)
+	Tags    string // List of build tags to consider satisfied during the build
+	LdFlags string // Arguments to pass on each go tool link invocation
+}
 
 func main() {
 	flag.Parse()
@@ -111,7 +124,14 @@ func main() {
 		}
 	}
 	// Cross compile the requested package into the local folder
-	if err := compile(flag.Args()[0], image, *srcRemote, *srcBranch, *inPackage, *crossDeps, *outFolder, *outPrefix, *buildVerbose, *buildSteps, *buildRace, strings.Split(*targets, ",")); err != nil {
+	flags := &BuildFlags{
+		Verbose: *buildVerbose,
+		Steps:   *buildSteps,
+		Race:    *buildRace,
+		Tags:    *buildTags,
+		LdFlags: *buildLdFlags,
+	}
+	if err := compile(flag.Args()[0], image, *srcRemote, *srcBranch, *inPackage, *crossDeps, *outFolder, *outPrefix, flags, strings.Split(*targets, ",")); err != nil {
 		log.Fatalf("Failed to cross compile package: %v.", err)
 	}
 }
@@ -143,7 +163,7 @@ func pullDockerImage(image string) error {
 }
 
 // Cross compiles a requested package into the current working directory.
-func compile(repo string, image string, remote string, branch string, pack string, deps string, dest string, prefix string, verbose bool, steps bool, race bool, targets []string) error {
+func compile(repo string, image string, remote string, branch string, pack string, deps string, dest string, prefix string, flags *BuildFlags, targets []string) error {
 	// Retrieve the current folder to store the binaries in
 	folder, err := os.Getwd()
 	if err != nil {
@@ -226,9 +246,11 @@ func compile(repo string, image string, remote string, branch string, pack strin
 		"-e", "PACK=" + pack,
 		"-e", "DEPS=" + deps,
 		"-e", "OUT=" + prefix,
-		"-e", fmt.Sprintf("FLAG_V=%v", verbose),
-		"-e", fmt.Sprintf("FLAG_X=%v", steps),
-		"-e", fmt.Sprintf("FLAG_RACE=%v", race),
+		"-e", fmt.Sprintf("FLAG_V=%v", flags.Verbose),
+		"-e", fmt.Sprintf("FLAG_X=%v", flags.Steps),
+		"-e", fmt.Sprintf("FLAG_RACE=%v", flags.Race),
+		"-e", fmt.Sprintf("FLAG_TAGS=%s", flags.Tags),
+		"-e", fmt.Sprintf("FLAG_LDFLAGS=%s", flags.LdFlags),
 		"-e", "TARGETS=" + strings.Replace(strings.Join(targets, " "), "*", ".", -1),
 	}
 	for i := 0; i < len(locals); i++ {

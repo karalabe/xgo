@@ -97,9 +97,11 @@ if [ "$OUT" != "" ]; then
   NAME=$OUT
 fi
 
-if [ "$FLAG_V" == "true" ]; then V=-v; fi
-if [ "$FLAG_X" == "true" ]; then X=-x; fi
+if [ "$FLAG_V" == "true" ];    then V=-v; fi
+if [ "$FLAG_X" == "true" ];    then X=-x; fi
 if [ "$FLAG_RACE" == "true" ]; then R=-race; fi
+if [ "$FLAG_TAGS" != "" ];     then T=(--tags "$FLAG_TAGS"); fi
+if [ "$FLAG_LDFLAGS" != "" ];  then LD="$FLAG_LDFLAGS"; fi
 
 # If no build targets were specified, inject a catch all wildcard
 if [ "$TARGETS" == "" ]; then
@@ -139,8 +141,8 @@ for TARGET in $TARGETS; do
 
         echo "Compiling for android-$PLATFORM/arm..."
         CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ HOST=arm-linux-androideabi PREFIX=/usr/$ANDROID_CHAIN_ARM/arm-linux-androideabi $BUILD_DEPS /deps
-        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go get $V $X -d ./$PACK
-        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build --ldflags="$EXT_LDPIE" $V $X $R -o /build/$NAME-android-$PLATFORM-arm$R ./$PACK
+        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go get $V $X "${T[@]}" --ldflags="$LD" -d ./$PACK
+        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$EXT_LDPIE $LD" -o /build/$NAME-android-$PLATFORM-arm ./$PACK
       fi
     fi
   fi
@@ -148,45 +150,45 @@ for TARGET in $TARGETS; do
   if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]); then
     echo "Compiling for linux/amd64..."
     HOST=x86_64-linux PREFIX=/usr/local $BUILD_DEPS /deps
-    GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build $V $X $R -o /build/$NAME-linux-amd64$R ./$PACK
+    GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$LD" -d ./$PACK
+    GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$LD" $R -o /build/$NAME-linux-amd64$R ./$PACK
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "386" ]); then
     echo "Compiling for linux/386..."
     HOST=i686-linux PREFIX=/usr/local $BUILD_DEPS /deps
-    GOOS=linux GOARCH=386 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    GOOS=linux GOARCH=386 CGO_ENABLED=1 go build $V $X -o /build/$NAME-linux-386 ./$PACK
+    GOOS=linux GOARCH=386 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$LD" -d ./$PACK
+    GOOS=linux GOARCH=386 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$LD" -o /build/$NAME-linux-386 ./$PACK
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "arm" ]); then
     echo "Compiling for linux/arm..."
     CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ HOST=arm-linux PREFIX=/usr/local/arm $BUILD_DEPS /deps
-    CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go get $V $X -d ./$PACK
-    CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go build $V $X -o /build/$NAME-linux-arm ./$PACK
+    CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go get $V $X "${T[@]}" --ldflags="$LD" -d ./$PACK
+    CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm CGO_ENABLED=1 GOARM=5 go build $V $X "${T[@]}" --ldflags="$LD" -o /build/$NAME-linux-arm ./$PACK
   fi
   # Check and build for Windows targets
   if ([ $XGOOS == "." ] || [ $XGOOS == "windows" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]); then
     echo "Compiling for windows/amd64..."
     CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ HOST=x86_64-w64-mingw32 PREFIX=/usr/x86_64-w64-mingw32 $BUILD_DEPS /deps
-    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build $V $X $R -o /build/$NAME-windows-amd64$R.exe ./$PACK
+    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$LD" -d ./$PACK
+    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$LD" $R -o /build/$NAME-windows-amd64$R.exe ./$PACK
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "windows" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "386" ]); then
     echo "Compiling for windows/386..."
     CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ HOST=i686-w64-mingw32 PREFIX=/usr/i686-w64-mingw32 $BUILD_DEPS /deps
-    CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386 CGO_ENABLED=1 go build $V $X -o /build/$NAME-windows-386.exe ./$PACK
+    CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$LD" -d ./$PACK
+    CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$LD" -o /build/$NAME-windows-386.exe ./$PACK
   fi
   # Check and build for OSX targets
   if ([ $XGOOS == "." ] || [ $XGOOS == "darwin" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]); then
     echo "Compiling for darwin/amd64..."
     CC=o64-clang CXX=o64-clang++ HOST=x86_64-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS /deps
-    CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -ldflags=-s $V $X $R -o /build/$NAME-darwin-amd64$R ./$PACK
+    CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="-s $LD" -d ./$PACK
+    CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="-s $LD" $R -o /build/$NAME-darwin-amd64$R ./$PACK
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "darwin" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "386" ]); then
     echo "Compiling for darwin/386..."
     CC=o32-clang CXX=o32-clang++ HOST=i386-apple-darwin10 PREFIX=/usr/local $BUILD_DEPS /deps
-    CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go get $V $X -d ./$PACK
-    CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build -ldflags=-s $V $X -o /build/$NAME-darwin-386 ./$PACK
+    CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="-s $LD" -d ./$PACK
+    CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="-s $LD" -o /build/$NAME-darwin-386 ./$PACK
   fi
 done
