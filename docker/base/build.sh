@@ -118,8 +118,8 @@ for TARGET in $TARGETS; do
   if ([ $XGOOS == "." ] || [[ $XGOOS == android* ]]); then
     # Split the platform version and configure the linker options
     PLATFORM=`echo $XGOOS | cut -d '-' -f 2`
-    if [ $XGOOS == "." ] || [ "$PLATFORM" == "" ] || [ "$PLATFORM" == "." ]; then
-      PLATFORM=$ANDROID_PLATFORM
+    if [ "$PLATFORM" == "" ] || [ "$PLATFORM" == "." ] || [ "$PLATFORM" == "android" ]; then
+      PLATFORM=16 # Jelly Bean 4.0.0
     fi
     if [ "$PLATFORM" -ge 16 ]; then
       CGO_CCPIE="-fPIE"
@@ -169,46 +169,51 @@ for TARGET in $TARGETS; do
   if [ $XGOOS == "." ] || [[ $XGOOS == windows* ]]; then
     # Split the platform version and configure the Windows NT version
     PLATFORM=`echo $XGOOS | cut -d '-' -f 2`
-    if [ "$PLATFORM" != "" ] && [ "$PLATFORM" != "windows" ]; then
-      MAJOR=`echo $PLATFORM | cut -d '.' -f 1`
-      if [ "${PLATFORM/.}" != "$PLATFORM" ] ; then
-        MINOR=`echo $PLATFORM | cut -d '.' -f 2`
-      fi
-      CGO_NTDEF="-D_WIN32_WINNT=0x`printf "%02d" $MAJOR``printf "%02d" $MINOR`"
+    if [ "$PLATFORM" == "" ] || [ "$PLATFORM" == "." ] || [ "$PLATFORM" == "windows" ]; then
+      PLATFORM=4.0 # Windows NT
     fi
+
+    MAJOR=`echo $PLATFORM | cut -d '.' -f 1`
+    if [ "${PLATFORM/.}" != "$PLATFORM" ] ; then
+      MINOR=`echo $PLATFORM | cut -d '.' -f 2`
+    fi
+    CGO_NTDEF="-D_WIN32_WINNT=0x`printf "%02d" $MAJOR``printf "%02d" $MINOR`"
+
     # Build the requested windows binaries
     if [ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]; then
-      echo "Compiling for $XGOOS/amd64..."
+      echo "Compiling for windows-$PLATFORM/amd64..."
       CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix HOST=x86_64-w64-mingw32 PREFIX=/usr/x86_64-w64-mingw32 $BUILD_DEPS /deps
       CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go get $V $X "${T[@]}" --ldflags="$LD" -d ./$PACK
-      CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go build $V $X "${T[@]}" --ldflags="$LD" $R -o /build/$NAME-$XGOOS-amd64$R.exe ./$PACK
+      CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go build $V $X "${T[@]}" --ldflags="$LD" $R -o /build/$NAME-windows-$PLATFORM-amd64$R.exe ./$PACK
     fi
     if [ $XGOARCH == "." ] || [ $XGOARCH == "386" ]; then
-      echo "Compiling for $XGOOS/386..."
+      echo "Compiling for windows-$PLATFORM/386..."
       CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix HOST=i686-w64-mingw32 PREFIX=/usr/i686-w64-mingw32 $BUILD_DEPS /deps
       CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix GOOS=windows GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go get $V $X "${T[@]}" --ldflags="$LD" -d ./$PACK
-      CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix GOOS=windows GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go build $V $X "${T[@]}" --ldflags="$LD" -o /build/$NAME-$XGOOS-386.exe ./$PACK
+      CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix GOOS=windows GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go build $V $X "${T[@]}" --ldflags="$LD" -o /build/$NAME-windows-$PLATFORM-386.exe ./$PACK
     fi
   fi
   # Check and build for OSX targets
   if [ $XGOOS == "." ] || [[ $XGOOS == darwin* ]]; then
     # Split the platform version and configure the deployment target
     PLATFORM=`echo $XGOOS | cut -d '-' -f 2`
-    if [ "$PLATFORM" != "" ] && [ "$PLATFORM" != "darwin" ]; then
-      export MACOSX_DEPLOYMENT_TARGET=$PLATFORM
+    if [ "$PLATFORM" == "" ] || [ "$PLATFORM" == "." ] || [ "$PLATFORM" == "darwin" ]; then
+      PLATFORM=10.6 # OS X Snow Leopard
     fi
+    export MACOSX_DEPLOYMENT_TARGET=$PLATFORM
+
     # Build the requested darwin binaries
     if [ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]; then
-      echo "Compiling for $XGOOS/amd64..."
+      echo "Compiling for darwin-$PLATFORM/amd64..."
       CC=o64-clang CXX=o64-clang++ HOST=x86_64-apple-darwin13 PREFIX=/usr/local $BUILD_DEPS /deps
       CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="-s $LD" -d ./$PACK
-      CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="-s $LD" $R -o /build/$NAME-$XGOOS-amd64$R ./$PACK
+      CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="-s $LD" $R -o /build/$NAME-darwin-$PLATFORM-amd64$R ./$PACK
     fi
     if [ $XGOARCH == "." ] || [ $XGOARCH == "386" ]; then
-      echo "Compiling for $XGOOS/386..."
+      echo "Compiling for darwin-$PLATFORM/386..."
       CC=o32-clang CXX=o32-clang++ HOST=i386-apple-darwin13 PREFIX=/usr/local $BUILD_DEPS /deps
       CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="-s $LD" -d ./$PACK
-      CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="-s $LD" -o /build/$NAME-$XGOOS-386 ./$PACK
+      CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="-s $LD" -o /build/$NAME-darwin-$PLATFORM-386 ./$PACK
     fi
     # Remove any automatically injected deployment target vars
     unset MACOSX_DEPLOYMENT_TARGET

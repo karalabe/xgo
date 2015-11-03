@@ -179,22 +179,23 @@ argument:
   * `--targets=*/arm`: builds ARM binaries for all platforms
   * `--targets=*/*`: builds all suppoted targets (default)
 
-The Android platform is handled a bit differently currently due to the multitude
-of available platform versions (23 as of writing, some obsolted). As it is mostly
-pointless to build for all possible versions, `xgo` by default builds only against
-the latest release, controllable via a numerical argument after the platform:
+### Platform versions
 
-  * `--targets=android-16/*`: build all supported architectures for Jelly Bean
-  * `--targets=android-16/arm,android-21/arm`: build for Jelly Bean and Lollipop
+By default `xgo` tries to cross compile to the lowest possible versions of every
+supported platform, in order to produce binaries that are portable among various
+versions of the same operating system. This however can lead to issues if a used
+dependency is only supported by more recent systems. As such, `xgo` supports the
+selection of specific platform versions by appending them to the OS target string.
 
-Note, `xgo` honors the Android's position independent executables (PIE) security
-requirement, builing all binaries equal and above to Jelly Bean with PIE enabled.
+ * `--targets=android-16/*`: cross compile to Android Jelly Bean
+ * `--targets=darwin-10.9/*`: cross compile to Mac OS X Mavericks
+ * `--targets=windows-6.0/*`: cross compile to Windows Vista
 
-    $ readelf -h iris-android-15-arm | grep Type
-      Type:                              EXEC (Executable file)
-    $ readelf -h iris-android-21-arm | grep Type
-      Type:                              DYN (Shared object file)
+The supported platforms are:
 
+ * All Android APIs up to Android Lollipop 5.0 ([API level ids](https://source.android.com/source/build-numbers.html))
+ * All Windows APIs up to Windows 8.1 limited by `mingw-w64` ([API level ids](https://en.wikipedia.org/wiki/Windows_NT#Releases))
+ * OSX APIs in the range of 10.6 - 10.9
 
 ### CGO dependencies
 
