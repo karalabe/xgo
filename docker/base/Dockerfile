@@ -29,16 +29,14 @@ RUN \
   ln -s /usr/include/asm-generic /usr/include/asm
 
 # Configure the container for OSX cross compilation
-ENV OSX_SDK_PATH    https://github.com/trevd/android_platform_build2/raw/master/osxsdks10.6.tar.gz
-ENV OSX_SDK         MacOSX10.6.sdk
+ENV OSX_SDK_PATH    https://s3.amazonaws.com/andrew-osx-sdks/MacOSX10.9.sdk.tar.xz
+ENV OSX_SDK         MacOSX10.9.sdk
 
 RUN \
   git clone https://github.com/tpoechtrager/osxcross.git && \
   \
-  $FETCH $OSX_SDK_PATH f526b4ae9806e8d31e3b094e3f004f8f160a3fad        && \
-  tar -xzf `basename $OSX_SDK_PATH` --strip-components 1 SDKs/$OSX_SDK && \
-  tar -cjf /osxcross/tarballs/$OSX_SDK.tar.bz2 $OSX_SDK                && \
-  rm -rf `basename $OSX_SDK_PATH` $OSX_SDK                             && \
+  $FETCH $OSX_SDK_PATH e2f01f6dc7611df4783d2adc279d15132f4e9851 && \
+  mv `basename $OSX_SDK_PATH` /osxcross/tarballs/               && \
   \
   sed -i -e 's|-march=native||g' /osxcross/build_clang.sh /osxcross/wrapper/build.sh && \
   UNATTENDED=yes OSX_VERSION_MIN=10.6 /osxcross/build.sh
