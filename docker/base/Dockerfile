@@ -3,7 +3,7 @@
 #
 # Released under the MIT license.
 
-FROM ubuntu:14.04
+FROM ubuntu:15.10
 
 MAINTAINER Péter Szilágyi <peterke@gmail.com>
 
@@ -21,15 +21,16 @@ RUN chmod +x $FETCH
 # Make sure apt-get is up to date and dependent packages are installed
 RUN \
   apt-get update && \
-  apt-get install -y automake autogen build-essential ca-certificates      \
-    gcc-arm-linux-gnueabi g++-arm-linux-gnueabi libc6-dev-armel-cross      \
-    gcc-multilib g++-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev   \
-    libtool libxml2-dev uuid-dev libssl-dev pkg-config patch make xz-utils \
-    cpio wget unzip p7zip git mercurial bzr --no-install-recommends
+  apt-get install -y automake autogen build-essential ca-certificates        \
+    gcc-5-arm-linux-gnueabi g++-5-arm-linux-gnueabi libc6-dev-armel-cross    \
+    gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev \
+    libtool libxml2-dev uuid-dev libssl-dev pkg-config patch make xz-utils   \
+    cpio wget unzip p7zip git mercurial bzr --no-install-recommends && \
+  ln -s /usr/include/asm-generic /usr/include/asm
 
 # Configure the container for OSX cross compilation
-ENV OSX_SDK_PATH https://github.com/trevd/android_platform_build2/raw/master/osxsdks10.6.tar.gz
-ENV OSX_SDK      MacOSX10.6.sdk
+ENV OSX_SDK_PATH    https://github.com/trevd/android_platform_build2/raw/master/osxsdks10.6.tar.gz
+ENV OSX_SDK         MacOSX10.6.sdk
 
 RUN \
   git clone https://github.com/tpoechtrager/osxcross.git && \
@@ -39,7 +40,7 @@ RUN \
   tar -cjf /osxcross/tarballs/$OSX_SDK.tar.bz2 $OSX_SDK && \
   rm -rf `basename $OSX_SDK_PATH` $OSX_SDK && \
   \
-  UNATTENDED=yes /osxcross/build.sh
+  UNATTENDED=yes OSX_VERSION_MIN=10.6 /osxcross/build.sh
 
 ENV PATH /osxcross/target/bin:$PATH
 
