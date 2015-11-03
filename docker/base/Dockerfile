@@ -35,11 +35,12 @@ ENV OSX_SDK         MacOSX10.6.sdk
 RUN \
   git clone https://github.com/tpoechtrager/osxcross.git && \
   \
-  $FETCH $OSX_SDK_PATH f526b4ae9806e8d31e3b094e3f004f8f160a3fad && \
+  $FETCH $OSX_SDK_PATH f526b4ae9806e8d31e3b094e3f004f8f160a3fad        && \
   tar -xzf `basename $OSX_SDK_PATH` --strip-components 1 SDKs/$OSX_SDK && \
-  tar -cjf /osxcross/tarballs/$OSX_SDK.tar.bz2 $OSX_SDK && \
-  rm -rf `basename $OSX_SDK_PATH` $OSX_SDK && \
+  tar -cjf /osxcross/tarballs/$OSX_SDK.tar.bz2 $OSX_SDK                && \
+  rm -rf `basename $OSX_SDK_PATH` $OSX_SDK                             && \
   \
+  sed -i -e 's|-march=native||g' /osxcross/build_clang.sh /osxcross/wrapper/build.sh && \
   UNATTENDED=yes OSX_VERSION_MIN=10.6 /osxcross/build.sh
 
 ENV PATH /osxcross/target/bin:$PATH
