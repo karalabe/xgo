@@ -68,10 +68,15 @@ ADD bootstrap.sh /bootstrap.sh
 ENV BOOTSTRAP /bootstrap.sh
 RUN chmod +x $BOOTSTRAP
 
-# Inject the new Go root distribution downloader and secondary bootstrapper
+# Inject the new Go root distribution downloader and bootstrapper
 ADD bootstrap_pure.sh /bootstrap_pure.sh
 ENV BOOTSTRAP_PURE /bootstrap_pure.sh
 RUN chmod +x $BOOTSTRAP_PURE
+
+# Inject the Go source distribution downloader and bootstrapper
+ADD bootstrap_repo.sh /bootstrap_repo.sh
+ENV BOOTSTRAP_REPO /bootstrap_repo.sh
+RUN chmod +x $BOOTSTRAP_REPO
 
 # Inject the C dependency cross compiler
 ADD build_deps.sh /build_deps.sh
