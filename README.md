@@ -92,9 +92,10 @@ be retrieved and installed.
 
 Additionally, a few wildcard release strings are also supported:
 
-  - `1.5.x` will use the latest point release of a specific Go version
   - `latest` will use the latest Go release (this is the default)
-  - `develop` will use the master branch of the Go repository
+  - `1.5.x` will use the latest point release of a specific Go version
+  - `1.5-develop` will use the develop branch of a specific Go version
+  - `develop` will use the develop branch of the entire Go repository
 
 ### Output prefixing
 
