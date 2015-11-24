@@ -31,15 +31,28 @@ var dockerDist = "karalabe/xgo-"
 // Command line arguments to fine tune the compilation
 var (
 	goVersion   = flag.String("go", "latest", "Go release to use for cross compilation")
-	inPackage   = flag.String("pkg", "", "Sub-package to build if not root import")
-	outPrefix   = flag.String("out", "", "Prefix to use for output naming (empty = package name)")
-	outFolder   = flag.String("dest", "", "Destination folder to put binaries in (empty = current)")
+	srcPackage  = flag.String("pkg", "", "Sub-package to build if not root import")
 	srcRemote   = flag.String("remote", "", "Version control remote repository to build")
 	srcBranch   = flag.String("branch", "", "Version control branch to build")
+	outPrefix   = flag.String("out", "", "Prefix to use for output naming (empty = package name)")
+	outFolder   = flag.String("dest", "", "Destination folder to put binaries in (empty = current)")
 	crossDeps   = flag.String("deps", "", "CGO dependencies (configure/make based archives)")
+	crossArgs   = flag.String("depsargs", "", "CGO dependency configure arguments")
 	targets     = flag.String("targets", "*/*", "Comma separated targets to build for")
 	dockerImage = flag.String("image", "", "Use custom docker image instead of official distribution")
 )
+
+// ConfigFlags is a simple set of flags to define the environment and dependencies.
+type ConfigFlags struct {
+	Repository   string   // Root import path to build
+	Package      string   // Sub-package to build if not root import
+	Prefix       string   // Prefix to use for output naming
+	Remote       string   // Version control remote repository to build
+	Branch       string   // Version control branch to build
+	Dependencies string   // CGO dependencies (configure/make based archives)
+	Arguments    string   // CGO dependency configure arguments
+	Targets      []string // Targets to build for
+}
 
 // Command line arguments to pass to go build
 var (
@@ -124,6 +137,16 @@ func main() {
 		}
 	}
 	// Cross compile the requested package into the local folder
+	config := &ConfigFlags{
+		Repository:   flag.Args()[0],
+		Package:      *srcPackage,
+		Remote:       *srcRemote,
+		Branch:       *srcBranch,
+		Prefix:       *outPrefix,
+		Dependencies: *crossDeps,
+		Arguments:    *crossArgs,
+		Targets:      strings.Split(*targets, ","),
+	}
 	flags := &BuildFlags{
 		Verbose: *buildVerbose,
 		Steps:   *buildSteps,
@@ -131,7 +154,7 @@ func main() {
 		Tags:    *buildTags,
 		LdFlags: *buildLdFlags,
 	}
-	if err := compile(flag.Args()[0], image, *srcRemote, *srcBranch, *inPackage, *crossDeps, *outFolder, *outPrefix, flags, strings.Split(*targets, ",")); err != nil {
+	if err := compile(image, config, flags, *outFolder); err != nil {
 		log.Fatalf("Failed to cross compile package: %v.", err)
 	}
 }
@@ -163,7 +186,7 @@ func pullDockerImage(image string) error {
 }
 
 // Cross compiles a requested package into the current working directory.
-func compile(repo string, image string, remote string, branch string, pack string, deps string, dest string, prefix string, flags *BuildFlags, targets []string) error {
+func compile(image string, config *ConfigFlags, flags *BuildFlags, dest string) error {
 	// Retrieve the current folder to store the binaries in
 	folder, err := os.Getwd()
 	if err != nil {
@@ -177,9 +200,9 @@ func compile(repo string, image string, remote string, branch string, pack strin
 	}
 	// If a local build was requested, find the import path and mount all GOPATH sources
 	locals, mounts, paths := []string{}, []string{}, []string{}
-	if strings.HasPrefix(repo, string(filepath.Separator)) || strings.HasPrefix(repo, ".") {
+	if strings.HasPrefix(config.Repository, string(filepath.Separator)) || strings.HasPrefix(config.Repository, ".") {
 		// Resolve the repository import path from the file path
-		path, err := filepath.Abs(repo)
+		path, err := filepath.Abs(config.Repository)
 		if err != nil {
 			log.Fatalf("Failed to locate requested package: %v.", err)
 		}
@@ -191,7 +214,7 @@ func compile(repo string, image string, remote string, branch string, pack strin
 		if err != nil {
 			log.Fatalf("Failed to resolve import path: %v.", err)
 		}
-		repo = pack.ImportPath
+		config.Repository = pack.ImportPath
 
 		// Iterate over all the local libs and export the mount points
 		if os.Getenv("GOPATH") == "" {
@@ -235,30 +258,31 @@ func compile(repo string, image string, remote string, branch string, pack strin
 		}
 	}
 	// Assemble and run the cross compilation command
-	fmt.Printf("Cross compiling %s...\n", repo)
+	fmt.Printf("Cross compiling %s...\n", config.Repository)
 
 	args := []string{
 		"run", "--rm",
 		"-v", folder + ":/build",
 		"-v", depsCache + ":/deps-cache:ro",
-		"-e", "REPO_REMOTE=" + remote,
-		"-e", "REPO_BRANCH=" + branch,
-		"-e", "PACK=" + pack,
-		"-e", "DEPS=" + deps,
-		"-e", "OUT=" + prefix,
+		"-e", "REPO_REMOTE=" + config.Remote,
+		"-e", "REPO_BRANCH=" + config.Branch,
+		"-e", "PACK=" + config.Package,
+		"-e", "DEPS=" + config.Dependencies,
+		"-e", "ARGS=" + config.Arguments,
+		"-e", "OUT=" + config.Prefix,
 		"-e", fmt.Sprintf("FLAG_V=%v", flags.Verbose),
 		"-e", fmt.Sprintf("FLAG_X=%v", flags.Steps),
 		"-e", fmt.Sprintf("FLAG_RACE=%v", flags.Race),
 		"-e", fmt.Sprintf("FLAG_TAGS=%s", flags.Tags),
 		"-e", fmt.Sprintf("FLAG_LDFLAGS=%s", flags.LdFlags),
-		"-e", "TARGETS=" + strings.Replace(strings.Join(targets, " "), "*", ".", -1),
+		"-e", "TARGETS=" + strings.Replace(strings.Join(config.Targets, " "), "*", ".", -1),
 	}
 	for i := 0; i < len(locals); i++ {
 		args = append(args, []string{"-v", fmt.Sprintf("%s:%s:ro", locals[i], mounts[i])}...)
 	}
 	args = append(args, []string{"-e", "EXT_GOPATH=" + strings.Join(paths, ":")}...)
 
-	args = append(args, []string{image, repo}...)
+	args = append(args, []string{image, config.Repository}...)
 	return run(exec.Command("docker", args...))
 }
 

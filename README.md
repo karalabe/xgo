@@ -53,14 +53,16 @@ Simply specify the import path you want to build, and xgo will do the rest:
     ...
 
     $ ls -al
-    -rwxr-xr-x  1 root  root  10899488 Sep 14 18:05 iris-android-21-arm
-    -rwxr-xr-x  1 root  root   6442188 Sep 14 18:05 iris-darwin-386
-    -rwxr-xr-x  1 root  root   8228756 Sep 14 18:05 iris-darwin-amd64
-    -rwxr-xr-x  1 root  root   9532568 Sep 14 18:05 iris-linux-386
-    -rwxr-xr-x  1 root  root  11776368 Sep 14 18:05 iris-linux-amd64
-    -rwxr-xr-x  1 root  root   9408928 Sep 14 18:05 iris-linux-arm
-    -rwxr-xr-x  1 root  root   7131477 Sep 14 18:05 iris-windows-386.exe
-    -rwxr-xr-x  1 root  root   8963900 Sep 14 18:05 iris-windows-amd64.exe
+    -rwxr-xr-x  1 root  root    9995000 Nov 24 16:44 iris-android-16-arm
+    -rwxr-xr-x  1 root  root    6776500 Nov 24 16:44 iris-darwin-10.6-386
+    -rwxr-xr-x  1 root  root    8755532 Nov 24 16:44 iris-darwin-10.6-amd64
+    -rwxr-xr-x  1 root  root    7114176 Nov 24 16:45 iris-ios-5.0-arm
+    -rwxr-xr-x  1 root  root   10135248 Nov 24 16:44 iris-linux-386
+    -rwxr-xr-x  1 root  root   12598472 Nov 24 16:44 iris-linux-amd64
+    -rwxr-xr-x  1 root  root   10040464 Nov 24 16:44 iris-linux-arm
+    -rwxr-xr-x  1 root  root    7516368 Nov 24 16:44 iris-windows-4.0-386.exe
+    -rwxr-xr-x  1 root  root    9549416 Nov 24 16:44 iris-windows-4.0-amd64.exe
+
 
 If the path is not a canonical import path, but rather a local path (starts with
 a dot `.` or a dash `/`), xgo will use the local GOPATH contents for the cross
@@ -106,14 +108,16 @@ file prefix. This can be overridden with the `-out` flag.
     ...
 
     $ ls -al
-    -rwxr-xr-x  1 root  root  10899488 Sep 14 18:08 iris-v0.3.2-android-21-arm
-    -rwxr-xr-x  1 root  root   6442188 Sep 14 18:08 iris-v0.3.2-darwin-386
-    -rwxr-xr-x  1 root  root   8228756 Sep 14 18:08 iris-v0.3.2-darwin-amd64
-    -rwxr-xr-x  1 root  root   9532568 Sep 14 18:08 iris-v0.3.2-linux-386
-    -rwxr-xr-x  1 root  root  11776368 Sep 14 18:08 iris-v0.3.2-linux-amd64
-    -rwxr-xr-x  1 root  root   9408928 Sep 14 18:08 iris-v0.3.2-linux-arm
-    -rwxr-xr-x  1 root  root   7131477 Sep 14 18:08 iris-v0.3.2-windows-386.exe
-    -rwxr-xr-x  1 root  root   8963900 Sep 14 18:08 iris-v0.3.2-windows-amd64.exe
+    -rwxr-xr-x  1 root  root   9995000 Nov 24 16:44 iris-v0.3.2-android-16-arm
+    -rwxr-xr-x  1 root  root   6776500 Nov 24 16:44 iris-v0.3.2-darwin-10.6-386
+    -rwxr-xr-x  1 root  root   8755532 Nov 24 16:44 iris-v0.3.2-darwin-10.6-amd64
+    -rwxr-xr-x  1 root  root   7114176 Nov 24 16:45 iris-v0.3.2-ios-5.0-arm
+    -rwxr-xr-x  1 root  root  10135248 Nov 24 16:44 iris-v0.3.2-linux-386
+    -rwxr-xr-x  1 root  root  12598472 Nov 24 16:44 iris-v0.3.2-linux-amd64
+    -rwxr-xr-x  1 root  root  10040464 Nov 24 16:44 iris-v0.3.2-linux-arm
+    -rwxr-xr-x  1 root  root   7516368 Nov 24 16:44 iris-v0.3.2-windows-4.0-386.exe
+    -rwxr-xr-x  1 root  root   9549416 Nov 24 16:44 iris-v0.3.2-windows-4.0-amd64.exe
+
 
 ### Branch selection
 
@@ -125,14 +129,16 @@ the desired branch name through the `--branch` argument.
     ...
 
     $ ls -al
-    -rwxr-xr-x  1 root  root   4928992 Sep 14 18:10 goimports-android-21-arm
-    -rwxr-xr-x  1 root  root   4139868 Sep 14 18:10 goimports-darwin-386
-    -rwxr-xr-x  1 root  root   5186720 Sep 14 18:10 goimports-darwin-amd64
-    -rwxr-xr-x  1 root  root   4189448 Sep 14 18:10 goimports-linux-386
-    -rwxr-xr-x  1 root  root   5264120 Sep 14 18:10 goimports-linux-amd64
-    -rwxr-xr-x  1 root  root   4209400 Sep 14 18:10 goimports-linux-arm
-    -rwxr-xr-x  1 root  root   4348416 Sep 14 18:10 goimports-windows-386.exe
-    -rwxr-xr-x  1 root  root   5415424 Sep 14 18:10 goimports-windows-amd64.exe
+    -rwxr-xr-x  1 root  root   4171248 Nov 24 16:40 goimports-android-16-arm
+    -rwxr-xr-x  1 root  root   4139868 Nov 24 16:40 goimports-darwin-10.6-386
+    -rwxr-xr-x  1 root  root   5186720 Nov 24 16:40 goimports-darwin-10.6-amd64
+    -rwxr-xr-x  1 root  root   3202364 Nov 24 16:40 goimports-ios-5.0-arm
+    -rwxr-xr-x  1 root  root   4189456 Nov 24 16:40 goimports-linux-386
+    -rwxr-xr-x  1 root  root   5264136 Nov 24 16:40 goimports-linux-amd64
+    -rwxr-xr-x  1 root  root   4209416 Nov 24 16:40 goimports-linux-arm
+    -rwxr-xr-x  1 root  root   4348416 Nov 24 16:40 goimports-windows-4.0-386.exe
+    -rwxr-xr-x  1 root  root   5415424 Nov 24 16:40 goimports-windows-4.0-amd64.exe
+
 
 ### Remote selection
 
@@ -156,14 +162,15 @@ parameter to select the exact package within, honoring any prior *branch* and
     ...
 
     $ ls -al
-    -rwxr-xr-x  1 root  root   4924036 Sep 14 18:09 goimports-android-21-arm
-    -rwxr-xr-x  1 root  root   4135776 Sep 14 18:09 goimports-darwin-386
-    -rwxr-xr-x  1 root  root   5182624 Sep 14 18:09 goimports-darwin-amd64
-    -rwxr-xr-x  1 root  root   4184416 Sep 14 18:09 goimports-linux-386
-    -rwxr-xr-x  1 root  root   5254800 Sep 14 18:09 goimports-linux-amd64
-    -rwxr-xr-x  1 root  root   4204440 Sep 14 18:09 goimports-linux-arm
-    -rwxr-xr-x  1 root  root   4343296 Sep 14 18:09 goimports-windows-386.exe
-    -rwxr-xr-x  1 root  root   5409280 Sep 14 18:09 goimports-windows-amd64.exe
+    -rwxr-xr-x  1 root  root   4194956 Nov 24 16:38 goimports-android-16-arm
+    -rwxr-xr-x  1 root  root   4164448 Nov 24 16:38 goimports-darwin-10.6-386
+    -rwxr-xr-x  1 root  root   5223584 Nov 24 16:38 goimports-darwin-10.6-amd64
+    -rwxr-xr-x  1 root  root   3222848 Nov 24 16:39 goimports-ios-5.0-arm
+    -rwxr-xr-x  1 root  root   4217184 Nov 24 16:38 goimports-linux-386
+    -rwxr-xr-x  1 root  root   5295768 Nov 24 16:38 goimports-linux-amd64
+    -rwxr-xr-x  1 root  root   4233120 Nov 24 16:38 goimports-linux-arm
+    -rwxr-xr-x  1 root  root   4373504 Nov 24 16:38 goimports-windows-4.0-386.exe
+    -rwxr-xr-x  1 root  root   5450240 Nov 24 16:38 goimports-windows-4.0-amd64.exe
 
 This argument may at some point be integrated into the import path itself, but for
 now it exists as an independent build parameter. Also, there is not possibility
@@ -189,6 +196,7 @@ versions of the same operating system. This however can lead to issues if a used
 dependency is only supported by more recent systems. As such, `xgo` supports the
 selection of specific platform versions by appending them to the OS target string.
 
+ * `--targets=ios-8.1/*`: cross compile to iOS 8.1
  * `--targets=android-16/*`: cross compile to Android Jelly Bean
  * `--targets=darwin-10.9/*`: cross compile to Mac OS X Mavericks
  * `--targets=windows-6.0/*`: cross compile to Windows Vista
@@ -198,6 +206,7 @@ The supported platforms are:
  * All Android APIs up to Android Lollipop 5.0 ([API level ids](https://source.android.com/source/build-numbers.html))
  * All Windows APIs up to Windows 8.1 limited by `mingw-w64` ([API level ids](https://en.wikipedia.org/wiki/Windows_NT#Releases))
  * OSX APIs in the range of 10.6 - 10.9
+ * All iOS APIs up to ios 8.1
 
 ### CGO dependencies
 
@@ -218,19 +227,24 @@ on subsequent calls.
 A complex sample for such a scenario is building the Ethereum CLI node, which has
 the GNU Multiple Precision Arithmetic Library as it's dependency.
 
-    $ xgo --deps=https://gmplib.org/download/gmp/gmp-6.0.0a.tar.bz2 \
-        --branch=develop github.com/ethereum/go-ethereum/cmd/geth
+    $ xgo --deps=https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2  \
+        --targets=windows/* github.com/ethereum/go-ethereum/cmd/geth
     ...
 
     $ ls -al
-    -rwxr-xr-x  1 root  root  23213372 Sep 14 17:59 geth-android-21-arm
-    -rwxr-xr-x  1 root  root  14373980 Sep 14 17:59 geth-darwin-386
-    -rwxr-xr-x  1 root  root  17373676 Sep 14 17:59 geth-darwin-amd64
-    -rwxr-xr-x  1 root  root  21098910 Sep 14 17:59 geth-linux-386
-    -rwxr-xr-x  1 root  root  25049693 Sep 14 17:59 geth-linux-amd64
-    -rwxr-xr-x  1 root  root  20578535 Sep 14 17:59 geth-linux-arm
-    -rwxr-xr-x  1 root  root  16351260 Sep 14 17:59 geth-windows-386.exe
-    -rwxr-xr-x  1 root  root  19418071 Sep 14 17:59 geth-windows-amd64.exe
+    -rwxr-xr-x 1 root root 16315679 Nov 24 16:39 geth-windows-4.0-386.exe
+    -rwxr-xr-x 1 root root 19452036 Nov 24 16:38 geth-windows-4.0-amd64.exe
+
+Some trivial arguments may be passed to the dependencies' configure script via
+`--depsargs`.
+
+    $ xgo --deps=https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2  \
+        --targets=ios/* --depsargs=--disable-assembly               \
+        github.com/ethereum/go-ethereum/cmd/geth
+    ...
+
+    $ ls -al
+    -rwxr-xr-x 1 root root 14804160 Nov 24 16:32 geth-ios-5.0-arm
 
 Note, that since xgo needs to cross compile the dependencies for each platform
 and architecture separately, build time can increase significantly.

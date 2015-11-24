@@ -63,6 +63,17 @@ RUN \
 
 ENV PATH /usr/$ANDROID_CHAIN_ARM/bin:$PATH
 
+# Configure the container for iOS cross compilation
+ENV IOS_SDK iPhoneOS8.1.sdk.tar.bz2
+ENV IOS_SDK_PATH http://iphone.howett.net/sdks/dl/iPhoneOS8.1.sdk.tbz2
+RUN \
+  $FETCH $IOS_SDK_PATH 41203ed17a29743323cce0dd10b238efcea406e1       && \
+  mv `basename $IOS_SDK_PATH` $IOS_SDK                                && \
+  git clone https://github.com/tpoechtrager/cctools-port.git          && \
+  /cctools-port/usage_examples/ios_toolchain/build.sh /$IOS_SDK armv7
+
+ENV PATH /cctools-port/usage_examples/ios_toolchain/target/bin:$PATH
+
 # Inject the old Go package downloader and tool-chain bootstrapper
 ADD bootstrap.sh /bootstrap.sh
 ENV BOOTSTRAP /bootstrap.sh
