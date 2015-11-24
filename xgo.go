@@ -61,6 +61,7 @@ var (
 	buildRace    = flag.Bool("race", false, "Enable data race detection (supported only on amd64)")
 	buildTags    = flag.String("tags", "", "List of build tags to consider satisfied during the build")
 	buildLdFlags = flag.String("ldflags", "", "Arguments to pass on each go tool link invocation")
+	buildMode    = flag.String("buildmode", "default", "Indicates which kind of object file to build")
 )
 
 // BuildFlags is a simple collection of flags to fine tune a build.
@@ -70,6 +71,7 @@ type BuildFlags struct {
 	Race    bool   // Enable data race detection (supported only on amd64)
 	Tags    string // List of build tags to consider satisfied during the build
 	LdFlags string // Arguments to pass on each go tool link invocation
+	Mode    string // Indicates which kind of object file to build
 }
 
 func main() {
@@ -153,6 +155,7 @@ func main() {
 		Race:    *buildRace,
 		Tags:    *buildTags,
 		LdFlags: *buildLdFlags,
+		Mode:    *buildMode,
 	}
 	if err := compile(image, config, flags, *outFolder); err != nil {
 		log.Fatalf("Failed to cross compile package: %v.", err)
@@ -275,6 +278,7 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, dest string) 
 		"-e", fmt.Sprintf("FLAG_RACE=%v", flags.Race),
 		"-e", fmt.Sprintf("FLAG_TAGS=%s", flags.Tags),
 		"-e", fmt.Sprintf("FLAG_LDFLAGS=%s", flags.LdFlags),
+		"-e", fmt.Sprintf("FLAG_BUILDMODE=%s", flags.Mode),
 		"-e", "TARGETS=" + strings.Replace(strings.Join(config.Targets, " "), "*", ".", -1),
 	}
 	for i := 0; i < len(locals); i++ {
