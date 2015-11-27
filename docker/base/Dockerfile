@@ -7,6 +7,10 @@ FROM ubuntu:15.10
 
 MAINTAINER Péter Szilágyi <peterke@gmail.com>
 
+# Mark the image as xgo enabled to support xgo-in-xgo
+ENV XGO_IN_XGO 1
+
+
 # Configure the Go environment, since it's not going to change
 ENV PATH   /usr/local/go/bin:$PATH
 ENV GOPATH /go

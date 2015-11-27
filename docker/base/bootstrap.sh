@@ -65,3 +65,7 @@ if [ "$DIST_WIN_32" != "" ]; then
   GOOS=windows GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap
   rm -f `basename $DIST_WIN_32`
 fi
+
+# Install xgo within the container to enable internal cross compilation
+echo "Installing xgo-in-xgo..."
+go get -u github.com/karalabe/xgo

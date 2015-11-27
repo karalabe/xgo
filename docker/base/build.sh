@@ -121,6 +121,9 @@ done
 
 DEPS_ARGS=($ARGS)
 
+# Save the contents of the pre-build /usr/local folder for post cleanup
+USR_LOCAL_CONTENTS=`ls /usr/local`
+
 # Configure some global build parameters
 NAME=`basename $1/$PACK`
 if [ "$OUT" != "" ]; then
@@ -288,5 +291,24 @@ for TARGET in $TARGETS; do
     fi
     # Remove any automatically injected deployment target vars
     unset IPHONEOS_DEPLOYMENT_TARGET
+  fi
+done
+
+# Clean up any leftovers for subsequent build invocations
+echo "Cleaning up build environment..."
+rm -rf /deps
+
+for dir in `ls /usr/local`; do
+  keep=0
+
+  # Check against original folder contents
+  for old in $USR_LOCAL_CONTENTS; do
+    if [ "$old" == "$dir" ]; then
+      keep=1
+    fi
+  done
+  # Delete anything freshly generated
+  if [ "$keep" == "0" ]; then
+    rm -rf "/usr/local/$dir"
   fi
 done

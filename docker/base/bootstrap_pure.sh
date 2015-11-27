@@ -44,3 +44,7 @@ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 CC=o64-clang go install std
 
 echo "Bootstrapping darwin/386..."
 GOOS=darwin GOARCH=386 CGO_ENABLED=1 CC=o32-clang go install std
+
+# Install xgo within the container to enable internal cross compilation
+echo "Installing xgo-in-xgo..."
+go get -u github.com/karalabe/xgo
