@@ -75,33 +75,43 @@ type BuildFlags struct {
 }
 
 func main() {
+	// Retrieve the CLI flags and the execution environment
 	flag.Parse()
 
-	// Ensure docker is available
-	if err := checkDocker(); err != nil {
-		log.Fatalf("Failed to check docker installation: %v.", err)
+	xgoInXgo := os.Getenv("XGO_IN_XGO") == "1"
+	if xgoInXgo {
+		depsCache = "/deps-cache"
 	}
-	// Validate the command line arguments
-	if len(flag.Args()) != 1 {
-		log.Fatalf("Usage: %s [options] <go import path>", os.Args[0])
-	}
-	// Select the image to use, either official or custom
-	image := dockerDist + *goVersion
-	if *dockerImage != "" {
-		image = *dockerImage
-	}
-	// Check that all required images are available
-	found, err := checkDockerImage(image)
-	switch {
-	case err != nil:
-		log.Fatalf("Failed to check docker image availability: %v.", err)
-	case !found:
-		fmt.Println("not found!")
-		if err := pullDockerImage(image); err != nil {
-			log.Fatalf("Failed to pull docker image from the registry: %v.", err)
+	// Only use docker images if we're not already inside out own image
+	image := ""
+
+	if !xgoInXgo {
+		// Ensure docker is available
+		if err := checkDocker(); err != nil {
+			log.Fatalf("Failed to check docker installation: %v.", err)
 		}
-	default:
-		fmt.Println("found.")
+		// Validate the command line arguments
+		if len(flag.Args()) != 1 {
+			log.Fatalf("Usage: %s [options] <go import path>", os.Args[0])
+		}
+		// Select the image to use, either official or custom
+		image = dockerDist + *goVersion
+		if *dockerImage != "" {
+			image = *dockerImage
+		}
+		// Check that all required images are available
+		found, err := checkDockerImage(image)
+		switch {
+		case err != nil:
+			log.Fatalf("Failed to check docker image availability: %v.", err)
+		case !found:
+			fmt.Println("not found!")
+			if err := pullDockerImage(image); err != nil {
+				log.Fatalf("Failed to pull docker image from the registry: %v.", err)
+			}
+		default:
+			fmt.Println("found.")
+		}
 	}
 	// Cache all external dependencies to prevent always hitting the internet
 	if *crossDeps != "" {
@@ -138,7 +148,7 @@ func main() {
 			}
 		}
 	}
-	// Cross compile the requested package into the local folder
+	// Assemble the cross compilation environment and build options
 	config := &ConfigFlags{
 		Repository:   flag.Args()[0],
 		Package:      *srcPackage,
@@ -157,7 +167,23 @@ func main() {
 		LdFlags: *buildLdFlags,
 		Mode:    *buildMode,
 	}
-	if err := compile(image, config, flags, *outFolder); err != nil {
+	folder, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to retrieve the working directory: %v.", err)
+	}
+	if *outFolder != "" {
+		folder, err = filepath.Abs(*outFolder)
+		if err != nil {
+			log.Fatalf("Failed to resolve destination path (%s): %v.", *outFolder, err)
+		}
+	}
+	// Execute the cross compilation, either in a container or the current system
+	if !xgoInXgo {
+		err = compile(image, config, flags, folder)
+	} else {
+		err = compileContained(config, flags, folder)
+	}
+	if err != nil {
 		log.Fatalf("Failed to cross compile package: %v.", err)
 	}
 }
@@ -188,36 +214,14 @@ func pullDockerImage(image string) error {
 	return run(exec.Command("docker", "pull", image))
 }
 
-// Cross compiles a requested package into the current working directory.
-func compile(image string, config *ConfigFlags, flags *BuildFlags, dest string) error {
-	// Retrieve the current folder to store the binaries in
-	folder, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("Failed to retrieve the working directory: %v.", err)
-	}
-	if dest != "" {
-		folder, err = filepath.Abs(dest)
-		if err != nil {
-			log.Fatalf("Failed to resolve destination path (%s): %v.", dest, err)
-		}
-	}
+// compile cross builds a requested package according to the given build specs
+// using a specific docker cross compilation image.
+func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string) error {
 	// If a local build was requested, find the import path and mount all GOPATH sources
 	locals, mounts, paths := []string{}, []string{}, []string{}
 	if strings.HasPrefix(config.Repository, string(filepath.Separator)) || strings.HasPrefix(config.Repository, ".") {
 		// Resolve the repository import path from the file path
-		path, err := filepath.Abs(config.Repository)
-		if err != nil {
-			log.Fatalf("Failed to locate requested package: %v.", err)
-		}
-		stat, err := os.Stat(path)
-		if err != nil || !stat.IsDir() {
-			log.Fatalf("Requested path invalid.")
-		}
-		pack, err := build.ImportDir(path, build.FindOnly)
-		if err != nil {
-			log.Fatalf("Failed to resolve import path: %v.", err)
-		}
-		config.Repository = pack.ImportPath
+		config.Repository = resolveImportPath(config.Repository)
 
 		// Iterate over all the local libs and export the mount points
 		if os.Getenv("GOPATH") == "" {
@@ -288,6 +292,62 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, dest string) 
 
 	args = append(args, []string{image, config.Repository}...)
 	return run(exec.Command("docker", args...))
+}
+
+// compileContained cross builds a requested package according to the given build
+// specs using the current system opposed to running in a container. This is meant
+// to be used for cross compilation already from within an xgo image, allowing the
+// inheritance and bundling of the root xgo images.
+func compileContained(config *ConfigFlags, flags *BuildFlags, folder string) error {
+	// If a local build was requested, resolve the import path
+	local := strings.HasPrefix(config.Repository, string(filepath.Separator)) || strings.HasPrefix(config.Repository, ".")
+	if local {
+		config.Repository = resolveImportPath(config.Repository)
+	}
+	// Fine tune the original environment variables with those required by the build script
+	env := []string{
+		"REPO_REMOTE=" + config.Remote,
+		"REPO_BRANCH=" + config.Branch,
+		"PACK=" + config.Package,
+		"DEPS=" + config.Dependencies,
+		"ARGS=" + config.Arguments,
+		"OUT=" + config.Prefix,
+		fmt.Sprintf("FLAG_V=%v", flags.Verbose),
+		fmt.Sprintf("FLAG_X=%v", flags.Steps),
+		fmt.Sprintf("FLAG_RACE=%v", flags.Race),
+		fmt.Sprintf("FLAG_TAGS=%s", flags.Tags),
+		fmt.Sprintf("FLAG_LDFLAGS=%s", flags.LdFlags),
+		fmt.Sprintf("FLAG_BUILDMODE=%s", flags.Mode),
+		"TARGETS=" + strings.Replace(strings.Join(config.Targets, " "), "*", ".", -1),
+	}
+	if local {
+		env = append(env, "EXT_GOPATH=/non-existent-path-to-signal-local-build")
+	}
+	// Assemble and run the local cross compilation command
+	fmt.Printf("Cross compiling %s...\n", config.Repository)
+
+	cmd := exec.Command("/build.sh", config.Repository)
+	cmd.Env = append(os.Environ(), env...)
+
+	return run(cmd)
+}
+
+// resolveImportPath converts a package given by a relative path to a Go import
+// path using the local GOPATH environment.
+func resolveImportPath(path string) string {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		log.Fatalf("Failed to locate requested package: %v.", err)
+	}
+	stat, err := os.Stat(abs)
+	if err != nil || !stat.IsDir() {
+		log.Fatalf("Requested path invalid.")
+	}
+	pack, err := build.ImportDir(abs, build.FindOnly)
+	if err != nil {
+		log.Fatalf("Failed to resolve import path: %v.", err)
+	}
+	return pack.ImportPath
 }
 
 // Executes a command synchronously, redirecting its output to stdout.
