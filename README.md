@@ -184,7 +184,7 @@ architectures supported by the underlying Go runtime. If you wish to restrict
 the build to only a few target systems, use the comma separated `--targets` CLI
 argument:
 
-  * `--targets=linux/arm`: builds only the ARMv5 Linux binaries
+  * `--targets=linux/arm`: builds only the ARMv5 Linux binaries (`arm-6`/`arm-7` allowed)
   * `--targets=windows/*,darwin/*`: builds all Windows and OSX binaries
   * `--targets=*/arm`: builds ARM binaries for all platforms
   * `--targets=*/*`: builds all suppoted targets (default)

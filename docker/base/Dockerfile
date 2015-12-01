@@ -25,10 +25,11 @@ RUN chmod +x $FETCH
 # Make sure apt-get is up to date and dependent packages are installed
 RUN \
   apt-get update && \
-  apt-get install -y automake autogen build-essential ca-certificates        \
-    gcc-5-arm-linux-gnueabi g++-5-arm-linux-gnueabi libc6-dev-armel-cross    \
-    gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev \
-    libtool libxml2-dev uuid-dev libssl-dev pkg-config patch make xz-utils   \
+  apt-get install -y automake autogen build-essential ca-certificates         \
+    gcc-5-arm-linux-gnueabi g++-5-arm-linux-gnueabi libc6-dev-armel-cross     \
+    gcc-5-arm-linux-gnueabihf g++-5-arm-linux-gnueabihf libc6-dev-armhf-cross \
+    gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev  \
+    libtool libxml2-dev uuid-dev libssl-dev pkg-config patch make xz-utils    \
     cpio wget unzip p7zip git mercurial bzr --no-install-recommends && \
   ln -s /usr/include/asm-generic /usr/include/asm
 
