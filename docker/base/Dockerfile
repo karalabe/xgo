@@ -28,6 +28,7 @@ RUN \
   apt-get install -y automake autogen build-essential ca-certificates         \
     gcc-5-arm-linux-gnueabi g++-5-arm-linux-gnueabi libc6-dev-armel-cross     \
     gcc-5-arm-linux-gnueabihf g++-5-arm-linux-gnueabihf libc6-dev-armhf-cross \
+    gcc-5-aarch64-linux-gnu g++-5-aarch64-linux-gnu libc6-dev-arm64-cross     \
     gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev  \
     libtool libxml2-dev uuid-dev libssl-dev pkg-config patch make xz-utils    \
     cpio wget unzip p7zip git mercurial bzr --no-install-recommends && \

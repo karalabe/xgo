@@ -246,6 +246,16 @@ for TARGET in $TARGETS; do
       rm -rf /usr/local/go/pkg/linux_arm
     fi
   fi
+  if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "arm64" ]); then
+    if [ "$GO_VERSION" -lt 150 ]; then
+      echo "Go version too low, skipping linux/arm64..."
+    else
+      echo "Compiling for linux/arm64..."
+      CC=aarch64-linux-gnu-gcc-5 CXX=aarch64-linux-gnu-g++-5 HOST=aarch64-linux-gnu PREFIX=/usr/aarch64-linux-gnu $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=aarch64-linux-gnu-gcc-5 CXX=aarch64-linux-gnu-g++-5 GOOS=linux GOARCH=arm64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
+      CC=aarch64-linux-gnu-gcc-5 CXX=aarch64-linux-gnu-g++-5 GOOS=linux GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" $BM -o "/build/$NAME-linux-arm64`extension linux`" ./$PACK
+    fi
+  fi
   # Check and build for Windows targets
   if [ $XGOOS == "." ] || [[ $XGOOS == windows* ]]; then
     # Split the platform version and configure the Windows NT version
