@@ -329,20 +329,38 @@ for TARGET in $TARGETS; do
       LDSTRIP="-s"
     fi
     # Build the requested darwin binaries
-    if [ $XGOARCH == "." ] || [ $XGOARCH == "arm" ]; then
+    if [ $XGOARCH == "." ] || [ $XGOARCH == "arm" ] || [ $XGOARCH == "arm-7" ]; then
       if [ "$GO_VERSION" -lt 150 ]; then
-        echo "Go version too low, skipping ios/arm..."
+        echo "Go version too low, skipping ios/arm-7..."
       else
-        echo "Bootstrapping ios-$PLATFORM/arm..."
+        echo "Bootstrapping ios-$PLATFORM/arm-7..."
+        export PATH=$IOS_NDK_ARM_7/bin:$PATH
         GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-apple-darwin11-clang go install std
 
-        echo "Compiling for ios-$PLATFORM/arm..."
+        echo "Compiling for ios-$PLATFORM/arm-7..."
         CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ HOST=arm-apple-darwin11 PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
         CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" -d ./$PACK
-        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" $BM -o "/build/$NAME-ios-$PLATFORM-arm`extension ios`" ./$PACK
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" $BM -o "/build/$NAME-ios-$PLATFORM-arm-7`extension ios`" ./$PACK
 
-        echo "Cleaning up Go runtime for ios-$PLATFORM/arm..."
+        echo "Cleaning up Go runtime for ios-$PLATFORM/arm-7..."
         rm -rf /usr/local/go/pkg/darwin_arm
+      fi
+    fi
+    if [ $XGOARCH == "." ] || [ $XGOARCH == "arm64" ]; then
+      if [ "$GO_VERSION" -lt 150 ]; then
+        echo "Go version too low, skipping ios/arm64..."
+      else
+        echo "Bootstrapping ios-$PLATFORM/arm64..."
+        export PATH=$IOS_NDK_ARM64/bin:$PATH
+        GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 CC=arm-apple-darwin11-clang go install std
+
+        echo "Compiling for ios-$PLATFORM/arm64..."
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ HOST=arm-apple-darwin11 PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" -d ./$PACK
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" $BM -o "/build/$NAME-ios-$PLATFORM-arm64`extension ios`" ./$PACK
+
+        echo "Cleaning up Go runtime for ios-$PLATFORM/arm64..."
+        rm -rf /usr/local/go/pkg/darwin_arm64
       fi
     fi
     # Remove any automatically injected deployment target vars

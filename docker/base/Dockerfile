@@ -25,14 +25,19 @@ RUN chmod +x $FETCH
 # Make sure apt-get is up to date and dependent packages are installed
 RUN \
   apt-get update && \
-  apt-get install -y automake autogen build-essential ca-certificates         \
-    gcc-5-arm-linux-gnueabi g++-5-arm-linux-gnueabi libc6-dev-armel-cross     \
-    gcc-5-arm-linux-gnueabihf g++-5-arm-linux-gnueabihf libc6-dev-armhf-cross \
-    gcc-5-aarch64-linux-gnu g++-5-aarch64-linux-gnu libc6-dev-arm64-cross     \
-    gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev  \
-    libtool libxml2-dev uuid-dev libssl-dev pkg-config patch make xz-utils    \
-    cpio wget unzip p7zip git mercurial bzr --no-install-recommends && \
-  ln -s /usr/include/asm-generic /usr/include/asm
+  apt-get install -y automake autogen build-essential ca-certificates            \
+    gcc-5-arm-linux-gnueabi g++-5-arm-linux-gnueabi libc6-dev-armel-cross        \
+    gcc-5-arm-linux-gnueabihf g++-5-arm-linux-gnueabihf libc6-dev-armhf-cross    \
+    gcc-5-aarch64-linux-gnu g++-5-aarch64-linux-gnu libc6-dev-arm64-cross        \
+    gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang-3.7 llvm-dev \
+    libtool libxml2-dev uuid-dev libssl-dev pkg-config patch make xz-utils       \
+    cpio wget unzip p7zip git mercurial bzr --no-install-recommends
+
+# Fix any stock package issues
+RUN \
+  ln -s /usr/include/asm-generic /usr/include/asm && \
+  ln -s /usr/bin/clang-3.7 /usr/bin/clang         && \
+  ln -s /usr/bin/clang++-3.7 /usr/bin/clang++
 
 # Configure the container for OSX cross compilation
 ENV OSX_SDK_PATH    https://s3.amazonaws.com/andrew-osx-sdks/MacOSX10.9.sdk.tar.xz
@@ -70,15 +75,22 @@ RUN \
 ENV PATH /usr/$ANDROID_CHAIN_ARM/bin:$PATH
 
 # Configure the container for iOS cross compilation
-ENV IOS_SDK iPhoneOS8.1.sdk.tar.bz2
-ENV IOS_SDK_PATH http://iphone.howett.net/sdks/dl/iPhoneOS8.1.sdk.tbz2
+ENV IOS_NDK_ARM_7 /usr/local/ios-ndk-arm-7
+ENV IOS_NDK_ARM64 /usr/local/ios-ndk-arm64
+
 RUN \
+  IOS_SDK=iPhoneOS8.1.sdk.tar.bz2                                     && \
+  IOS_SDK_PATH=http://iphone.howett.net/sdks/dl/iPhoneOS8.1.sdk.tbz2  && \
   $FETCH $IOS_SDK_PATH 41203ed17a29743323cce0dd10b238efcea406e1       && \
   mv `basename $IOS_SDK_PATH` $IOS_SDK                                && \
+  \
   git clone https://github.com/tpoechtrager/cctools-port.git          && \
-  /cctools-port/usage_examples/ios_toolchain/build.sh /$IOS_SDK armv7
-
-ENV PATH /cctools-port/usage_examples/ios_toolchain/target/bin:$PATH
+  /cctools-port/usage_examples/ios_toolchain/build.sh /$IOS_SDK armv7 && \
+  mv /cctools-port/usage_examples/ios_toolchain/target $IOS_NDK_ARM_7 && \
+  /cctools-port/usage_examples/ios_toolchain/build.sh /$IOS_SDK arm64 && \
+  mv /cctools-port/usage_examples/ios_toolchain/target $IOS_NDK_ARM64 && \
+  \
+  rm -rf $IOS_SDK /cctools-port
 
 # Inject the old Go package downloader and tool-chain bootstrapper
 ADD bootstrap.sh /bootstrap.sh
