@@ -40,19 +40,23 @@ RUN \
   ln -s /usr/bin/clang++-3.7 /usr/bin/clang++
 
 # Configure the container for OSX cross compilation
-ENV OSX_SDK_PATH    https://s3.amazonaws.com/andrew-osx-sdks/MacOSX10.9.sdk.tar.xz
-ENV OSX_SDK         MacOSX10.9.sdk
+ENV OSX_SDK     MacOSX10.9.sdk
+ENV OSX_NDK_X86 /usr/local/osx-ndk-x86
 
 RUN \
-  git clone https://github.com/tpoechtrager/osxcross.git && \
+  OSX_SDK_PATH=https://s3.amazonaws.com/andrew-osx-sdks/MacOSX10.9.sdk.tar.xz && \
+  $FETCH $OSX_SDK_PATH e2f01f6dc7611df4783d2adc279d15132f4e9851               && \
   \
-  $FETCH $OSX_SDK_PATH e2f01f6dc7611df4783d2adc279d15132f4e9851 && \
-  mv `basename $OSX_SDK_PATH` /osxcross/tarballs/               && \
+  git clone https://github.com/tpoechtrager/osxcross.git && \
+  mv `basename $OSX_SDK_PATH` /osxcross/tarballs/        && \
   \
   sed -i -e 's|-march=native||g' /osxcross/build_clang.sh /osxcross/wrapper/build.sh && \
-  UNATTENDED=yes OSX_VERSION_MIN=10.6 /osxcross/build.sh
+  UNATTENDED=yes OSX_VERSION_MIN=10.6 /osxcross/build.sh                             && \
+  mv /osxcross/target $OSX_NDK_X86                                                   && \
+  \
+  rm -rf /osxcross
 
-ENV PATH /osxcross/target/bin:$PATH
+ENV PATH $OSX_NDK_X86/bin:$PATH
 
 # Configure the container for Android cross compilation
 ENV ANDROID_NDK       android-ndk-r10e
@@ -75,22 +79,20 @@ RUN \
 ENV PATH /usr/$ANDROID_CHAIN_ARM/bin:$PATH
 
 # Configure the container for iOS cross compilation
-ENV IOS_NDK_ARM_7 /usr/local/ios-ndk-arm-7
-ENV IOS_NDK_ARM64 /usr/local/ios-ndk-arm64
+ENV IOS_NDK_ARM_7     /usr/local/ios-ndk-arm-7
+ENV IOS_NDK_ARM64     /usr/local/ios-ndk-arm64
+ENV IOS_SIM_NDK_AMD64 /usr/local/ios-sim-ndk-amd64
+
+ADD update_ios.sh /update_ios.sh
+ENV UPDATE_IOS /update_ios.sh
+RUN chmod +x $UPDATE_IOS
 
 RUN \
-  IOS_SDK=iPhoneOS8.1.sdk.tar.bz2                                     && \
-  IOS_SDK_PATH=http://iphone.howett.net/sdks/dl/iPhoneOS8.1.sdk.tbz2  && \
-  $FETCH $IOS_SDK_PATH 41203ed17a29743323cce0dd10b238efcea406e1       && \
-  mv `basename $IOS_SDK_PATH` $IOS_SDK                                && \
-  \
-  git clone https://github.com/tpoechtrager/cctools-port.git          && \
-  /cctools-port/usage_examples/ios_toolchain/build.sh /$IOS_SDK armv7 && \
-  mv /cctools-port/usage_examples/ios_toolchain/target $IOS_NDK_ARM_7 && \
-  /cctools-port/usage_examples/ios_toolchain/build.sh /$IOS_SDK arm64 && \
-  mv /cctools-port/usage_examples/ios_toolchain/target $IOS_NDK_ARM64 && \
-  \
-  rm -rf $IOS_SDK /cctools-port
+  IOS_SDK_PATH=http://iphone.howett.net/sdks/dl/iPhoneOS8.1.sdk.tbz2 && \
+  $FETCH $IOS_SDK_PATH 41203ed17a29743323cce0dd10b238efcea406e1      && \
+  mv `basename $IOS_SDK_PATH` iPhoneOS8.1.sdk.tar.bz2                && \
+  $UPDATE_IOS /iPhoneOS8.1.sdk.tar.bz2                               && \
+  rm -rf /iPhoneOS8.1.sdk.tar.bz2
 
 # Inject the old Go package downloader and tool-chain bootstrapper
 ADD bootstrap.sh /bootstrap.sh

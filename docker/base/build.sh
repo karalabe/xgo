@@ -323,45 +323,92 @@ for TARGET in $TARGETS; do
     fi
     export IPHONEOS_DEPLOYMENT_TARGET=$PLATFORM
 
-    # Strip symbol table below Go 1.6 to prevent DWARF issues
-    LDSTRIP=""
-    if [ "$GO_VERSION" -lt 160 ]; then
-      LDSTRIP="-s"
-    fi
-    # Build the requested darwin binaries
-    if [ $XGOARCH == "." ] || [ $XGOARCH == "arm" ] || [ $XGOARCH == "arm-7" ]; then
-      if [ "$GO_VERSION" -lt 150 ]; then
-        echo "Go version too low, skipping ios/arm-7..."
+    # Build the requested iOS binaries
+    if [ "$GO_VERSION" -lt 150 ]; then
+      echo "Go version too low, skipping ios..."
+    else
+      # Add the 'ios' tag to all builds, otherwise the std libs will fail
+      if [ "$FLAG_TAGS" != "" ]; then
+        IOSTAGS=(--tags "ios $FLAG_TAGS")
       else
+        IOSTAGS=(--tags ios)
+      fi
+      mkdir -p /build-ios
+
+      # Cross compile to all available iOS and simulator platforms
+      if [ -d "$IOS_NDK_ARM_7" ] && ([ $XGOARCH == "." ] || [ $XGOARCH == "arm" ] || [ $XGOARCH == "arm-7" ]); then
         echo "Bootstrapping ios-$PLATFORM/arm-7..."
         export PATH=$IOS_NDK_ARM_7/bin:$PATH
-        GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-apple-darwin11-clang go install std
+        GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-apple-darwin11-clang go install --tags ios std
 
         echo "Compiling for ios-$PLATFORM/arm-7..."
         CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ HOST=arm-apple-darwin11 PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
-        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" -d ./$PACK
-        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" $BM -o "/build/$NAME-ios-$PLATFORM-arm-7`extension ios`" ./$PACK
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 go get $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" -d ./$PACK
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" --buildmode=c-archive -o "/build-ios/$NAME-ios-$PLATFORM-armv7.a" ./$PACK
 
         echo "Cleaning up Go runtime for ios-$PLATFORM/arm-7..."
         rm -rf /usr/local/go/pkg/darwin_arm
       fi
-    fi
-    if [ $XGOARCH == "." ] || [ $XGOARCH == "arm64" ]; then
-      if [ "$GO_VERSION" -lt 150 ]; then
-        echo "Go version too low, skipping ios/arm64..."
-      else
+      if [ -d "$IOS_NDK_ARM64" ] && ([ $XGOARCH == "." ] || [ $XGOARCH == "arm" ] || [ $XGOARCH == "arm64" ]); then
         echo "Bootstrapping ios-$PLATFORM/arm64..."
         export PATH=$IOS_NDK_ARM64/bin:$PATH
-        GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 CC=arm-apple-darwin11-clang go install std
+        GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 CC=arm-apple-darwin11-clang go install --tags ios std
 
         echo "Compiling for ios-$PLATFORM/arm64..."
         CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ HOST=arm-apple-darwin11 PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
-        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" -d ./$PACK
-        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" $BM -o "/build/$NAME-ios-$PLATFORM-arm64`extension ios`" ./$PACK
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go get $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" -d ./$PACK
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" --buildmode=c-archive -o "/build-ios/$NAME-ios-$PLATFORM-arm64.a" ./$PACK
 
         echo "Cleaning up Go runtime for ios-$PLATFORM/arm64..."
         rm -rf /usr/local/go/pkg/darwin_arm64
       fi
+      if [ -d "$IOS_SIM_NDK_AMD64" ] && ([ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]); then
+        echo "Bootstrapping ios-$PLATFORM/amd64..."
+        export PATH=$IOS_SIM_NDK_AMD64/bin:$PATH
+        mv /usr/local/go/pkg/darwin_amd64 /usr/local/go/pkg/darwin_amd64_bak
+        GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 CC=arm-apple-darwin11-clang go install --tags ios std
+
+        echo "Compiling for ios-$PLATFORM/amd64..."
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ HOST=arm-apple-darwin11 PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go get $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" -d ./$PACK
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" --buildmode=c-archive -o "/build-ios/$NAME-ios-$PLATFORM-x86_64.a" ./$PACK
+
+        echo "Cleaning up Go runtime for ios-$PLATFORM/amd64..."
+        rm -rf /usr/local/go/pkg/darwin_amd64
+        mv /usr/local/go/pkg/darwin_amd64_bak /usr/local/go/pkg/darwin_amd64
+      fi
+      # Assemble the iOS framework from the built binaries
+      title=${NAME^}
+      framework=/build/$NAME-ios-$PLATFORM/$title.framework
+
+      rm -rf $framework
+      mkdir -p $framework/Versions/A
+      (cd $framework/Versions && ln -nsf A Current)
+
+      arches=()
+      for lib in `ls /build-ios | grep -e '\.a$'`; do
+        arches+=("-arch" "`echo ${lib##*-} | cut -d '.' -f 1`" "/build-ios/$lib")
+      done
+      arm-apple-darwin11-lipo -create "${arches[@]}" -o $framework/Versions/A/$title
+      arm-apple-darwin11-ranlib $framework/Versions/A/$title
+      (cd $framework && ln -nsf Versions/A/$title $title)
+
+      mkdir -p $framework/Versions/A/Headers
+      for header in `ls /build-ios | grep -e '\.h$'`; do
+        cp -f /build-ios/$header $framework/Versions/A/Headers/$title.h
+      done
+      (cd $framework && ln -nsf Versions/A/Headers Headers)
+
+      mkdir -p $framework/Versions/A/Resources
+      echo -e "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n</dict>\n</plist>" > $framework/Versions/A/Resources/Info.plist
+      (cd $framework && ln -nsf Versions/A/Resources Resources)
+
+      mkdir -p $framework/Versions/A/Modules
+      echo -e "framework module \"$title\" {\n  header \"$title.h\"\n  export *\n}" > $framework/Versions/A/Modules/module.modulemap
+      (cd $framework && ln -nsf Versions/A/Modules Modules)
+
+      chmod 777 -R /build/$NAME-ios-$PLATFORM
+      rm -rf /build-ios
     fi
     # Remove any automatically injected deployment target vars
     unset IPHONEOS_DEPLOYMENT_TARGET
