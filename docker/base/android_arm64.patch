@@ -1,4 +1,4 @@
-From 844d3e17e89af37ce4b851b73e4c2a903f8dcfd4 Mon Sep 17 00:00:00 2001
+From 254e42a0d1fc8f7281403218fde7252079b4310f Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?P=C3=A9ter=20Szil=C3=A1gyi?= <peterke@gmail.com>
 Date: Sun, 13 Dec 2015 21:04:06 +0200
 Subject: [PATCH] runtime: init argc/argv for android/arm64 c-shared
@@ -9,14 +9,14 @@ arm64 architecture.
 
 Change-Id: I851958b4b0944ec79d7a1426a3bb2cfc31746797
 ---
- src/runtime/rt0_android_arm64.s | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+ src/runtime/rt0_android_arm64.s | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
 diff --git a/src/runtime/rt0_android_arm64.s b/src/runtime/rt0_android_arm64.s
-index 7291476..5341a25 100644
+index 7291476..582fc5a 100644
 --- a/src/runtime/rt0_android_arm64.s
 +++ b/src/runtime/rt0_android_arm64.s
-@@ -8,6 +8,25 @@ TEXT _rt0_arm64_android(SB),NOSPLIT,$-8
+@@ -8,6 +8,18 @@ TEXT _rt0_arm64_android(SB),NOSPLIT,$-8
  	MOVD	$_rt0_arm64_linux(SB), R4
  	B	(R4)
  
@@ -31,17 +31,10 @@ index 7291476..5341a25 100644
 +DATA _rt0_arm64_android_argv+0x00(SB)/8,$_rt0_arm64_android_argv0(SB)
 +DATA _rt0_arm64_android_argv+0x08(SB)/8,$0
 +DATA _rt0_arm64_android_argv+0x10(SB)/8,$0
-+DATA _rt0_arm64_android_argv+0x18(SB)/8,$15      // AT_PLATFORM
-+DATA _rt0_arm64_android_argv+0x20(SB)/8,$_rt0_arm64_android_auxv0(SB)
-+DATA _rt0_arm64_android_argv+0x28(SB)/8,$16      // AT_HWCAP
-+DATA _rt0_arm64_android_argv+0x30(SB)/8,$0
-+GLOBL _rt0_arm64_android_argv(SB),NOPTR,$0x38
++GLOBL _rt0_arm64_android_argv(SB),NOPTR,$0x18
 +
 +DATA _rt0_arm64_android_argv0(SB)/8, $"gojni"
 +GLOBL _rt0_arm64_android_argv0(SB),RODATA,$8
-+
-+DATA _rt0_arm64_android_auxv0(SB)/8, $"v8a"
-+GLOBL _rt0_arm64_android_auxv0(SB),RODATA,$8
 -- 
 2.5.0
 

@@ -253,6 +253,7 @@ for TARGET in $TARGETS; do
       jni=`mktemp -d`
       cp `find /build-android-aar | grep '\.h$' | head -n 1` $jni/$NAME.h
       sed -i -e 's|__complex|complex|g' $jni/$NAME.h
+      sed -i -e 's|_Complex|complex|g' $jni/$NAME.h
       echo -e "%module $title\n%{\n#include \"$NAME.h\"\n%}\n%pragma(java) jniclasscode=%{\nstatic {\nSystem.loadLibrary(\"$NAME\");\n}\n%}\n%include \"$NAME.h\"" > $jni/$NAME.i
 
       mkdir -p $jni/${package//.//}
