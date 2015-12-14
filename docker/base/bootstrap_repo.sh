@@ -10,10 +10,6 @@
 #   FETCH - Remote file fetcher and checksum verifier (injected by image)
 set -e
 
-# Prepare the image for manual Go compilation
-apt-get install -y netbase --no-install-recommends # Needed for `net` tests
-apt-get remove -y clang                            # Broken thread sanitizer
-
 # Define the paths to deploy the bootstrapper and the final distribution
 export GOROOT=/usr/local/go
 export GOROOT_BOOTSTRAP=${GOROOT}-boot
@@ -31,13 +27,10 @@ mv $GOROOT $GOROOT_BOOTSTRAP
 # Download, build and install the requesed Go sources
 (cd /usr/local && git clone https://go.googlesource.com/go)
 (cd $GOROOT && git checkout $1)
-(cd $GOROOT/src && ./all.bash)
+(cd $GOROOT && if [ "$1" == "master" ]; then git apply /android_arm64.patch; fi)
+(cd $GOROOT/src && ./make.bash)
 
-rm -rf $GOROOT_BOOTSTRAP        && \
-export GOROOT_BOOTSTRAP=$GOROOT && \
-
-# Restore the original image and bootstrap Go
-apt-get install -y clang --no-install-recommends
-apt-get remove -y netbase
+rm -rf $GOROOT_BOOTSTRAP
+export GOROOT_BOOTSTRAP=$GOROOT
 
 $BOOTSTRAP_PURE

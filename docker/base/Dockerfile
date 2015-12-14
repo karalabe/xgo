@@ -30,8 +30,8 @@ RUN \
     gcc-5-arm-linux-gnueabihf g++-5-arm-linux-gnueabihf libc6-dev-armhf-cross    \
     gcc-5-aarch64-linux-gnu g++-5-aarch64-linux-gnu libc6-dev-arm64-cross        \
     gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang-3.7 llvm-dev \
-    libtool libxml2-dev uuid-dev libssl-dev pkg-config patch make xz-utils       \
-    cpio wget unzip p7zip git mercurial bzr --no-install-recommends
+    libtool libxml2-dev uuid-dev libssl-dev swig openjdk-7-jdk pkg-config patch  \
+    make xz-utils cpio wget zip unzip p7zip git mercurial bzr --no-install-recommends
 
 # Fix any stock package issues
 RUN \
@@ -58,26 +58,6 @@ RUN \
 
 ENV PATH $OSX_NDK_X86/bin:$PATH
 
-# Configure the container for Android cross compilation
-ENV ANDROID_NDK       android-ndk-r10e
-ENV ANDROID_NDK_PATH  http://dl.google.com/android/ndk/$ANDROID_NDK-linux-x86_64.bin
-ENV ANDROID_NDK_ROOT  /usr/local/$ANDROID_NDK
-ENV ANDROID_PLATFORM  21
-ENV ANDROID_CHAIN_ARM arm-linux-androideabi-4.9
-
-RUN \
-  $FETCH $ANDROID_NDK_PATH c685e5f106f8daa9b5449d0a4f21ee8c0afcb2f6 && \
-  7zr x `basename $ANDROID_NDK_PATH` \
-    "$ANDROID_NDK/build"                                           \
-    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/include"       \
-    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi*" \
-    "$ANDROID_NDK/prebuilt/linux-x86_64"                           \
-    "$ANDROID_NDK/platforms/*/arch-arm"                            \
-    "$ANDROID_NDK/toolchains/$ANDROID_CHAIN_ARM" -o/usr/local > /dev/null && \
-  rm -f `basename $ANDROID_NDK_PATH`
-
-ENV PATH /usr/$ANDROID_CHAIN_ARM/bin:$PATH
-
 # Configure the container for iOS cross compilation
 ENV IOS_NDK_ARM_7     /usr/local/ios-ndk-arm-7
 ENV IOS_NDK_ARM64     /usr/local/ios-ndk-arm64
@@ -93,6 +73,37 @@ RUN \
   mv `basename $IOS_SDK_PATH` iPhoneOS8.1.sdk.tar.bz2                && \
   $UPDATE_IOS /iPhoneOS8.1.sdk.tar.bz2                               && \
   rm -rf /iPhoneOS8.1.sdk.tar.bz2
+
+# Configure the container for Android cross compilation
+ENV ANDROID_NDK         android-ndk-r10e
+ENV ANDROID_NDK_PATH    http://dl.google.com/android/ndk/$ANDROID_NDK-linux-x86_64.bin
+ENV ANDROID_NDK_ROOT    /usr/local/$ANDROID_NDK
+ENV ANDROID_NDK_LIBC    $ANDROID_NDK_ROOT/sources/cxx-stl/gnu-libstdc++/4.9
+ENV ANDROID_PLATFORM    21
+ENV ANDROID_CHAIN_ARM   arm-linux-androideabi-4.9
+ENV ANDROID_CHAIN_ARM64 aarch64-linux-android-4.9
+ENV ANDROID_CHAIN_386   x86-4.9
+
+RUN \
+  $FETCH $ANDROID_NDK_PATH c685e5f106f8daa9b5449d0a4f21ee8c0afcb2f6 && \
+  7zr x `basename $ANDROID_NDK_PATH` \
+    "$ANDROID_NDK/build"                                           \
+    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/include"       \
+    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi*" \
+    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64*"   \
+    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/libs/x86"      \
+    "$ANDROID_NDK/prebuilt/linux-x86_64"                           \
+    "$ANDROID_NDK/platforms/*/arch-arm"                            \
+    "$ANDROID_NDK/platforms/*/arch-arm64"                          \
+    "$ANDROID_NDK/platforms/*/arch-x86"                            \
+    "$ANDROID_NDK/toolchains/$ANDROID_CHAIN_ARM"                   \
+    "$ANDROID_NDK/toolchains/$ANDROID_CHAIN_ARM64"                 \
+    "$ANDROID_NDK/toolchains/$ANDROID_CHAIN_386" -o/usr/local > /dev/null && \
+  rm -f `basename $ANDROID_NDK_PATH`
+
+ENV PATH /usr/$ANDROID_CHAIN_ARM/bin:$PATH
+ENV PATH /usr/$ANDROID_CHAIN_ARM64/bin:$PATH
+ENV PATH /usr/$ANDROID_CHAIN_386/bin:$PATH
 
 # Inject the old Go package downloader and tool-chain bootstrapper
 ADD bootstrap.sh /bootstrap.sh
@@ -120,3 +131,6 @@ ENV BUILD /build.sh
 RUN chmod +x $BUILD
 
 ENTRYPOINT ["/build.sh"]
+
+# Temporary injects to fix possible Go bugs
+ADD android_arm64.patch /android_arm64.patch
