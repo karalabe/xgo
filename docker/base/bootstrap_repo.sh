@@ -27,7 +27,6 @@ mv $GOROOT $GOROOT_BOOTSTRAP
 # Download, build and install the requesed Go sources
 (cd /usr/local && git clone https://go.googlesource.com/go)
 (cd $GOROOT && git checkout $1)
-(cd $GOROOT && if [ "$1" == "master" ]; then git apply /android_arm64.patch; fi)
 (cd $GOROOT/src && ./make.bash)
 
 rm -rf $GOROOT_BOOTSTRAP

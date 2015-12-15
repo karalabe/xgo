@@ -131,6 +131,3 @@ ENV BUILD /build.sh
 RUN chmod +x $BUILD
 
 ENTRYPOINT ["/build.sh"]
-
-# Temporary injects to fix possible Go bugs
-ADD android_arm64.patch /android_arm64.patch
