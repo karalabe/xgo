@@ -9,4 +9,4 @@ MAINTAINER Péter Szilágyi <peterke@gmail.com>
 
 # Clone and bootstrap the latest Go develop branch
 RUN $BOOTSTRAP_REPO release-branch.go1.5
-ENV GO_VERSION 152
+ENV GO_VERSION 153

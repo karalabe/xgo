@@ -16,9 +16,9 @@ export GOROOT_BOOTSTRAP=${GOROOT}-boot
 
 # Download and install the Go bootstrap distribution
 BOOT_DIST=https://storage.googleapis.com/golang/go1.4.3.linux-amd64.tar.gz
-BOOT_DIST_SHA1=332b64236d30a8805fc8dd8b3a269915b4c507fe
+BOOT_DIST_SHA=332b64236d30a8805fc8dd8b3a269915b4c507fe
 
-$FETCH $BOOT_DIST $BOOT_DIST_SHA1
+$FETCH $BOOT_DIST $BOOT_DIST_SHA
 
 tar -C /usr/local -xzf `basename $BOOT_DIST`
 rm -f `basename $BOOT_DIST`

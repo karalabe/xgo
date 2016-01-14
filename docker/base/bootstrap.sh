@@ -7,23 +7,23 @@
 #
 # Needed environment variables:
 #   FETCH - Remote file fetcher and checksum verifier (injected by image)
-#   DIST_LINUX_64,  DIST_LINUX_64_SHA1  - 64 bit Linux Go binaries and checksum
-#   DIST_LINUX_32,  DIST_LINUX_32_SHA1  - 32 bit Linux Go binaries and checksum
-#   DIST_LINUX_ARM, DIST_LINUX_ARM_SHA1 - ARM v5 Linux Go binaries and checksum
-#   DIST_OSX_64,    DIST_OSX_64_SHA1    - 64 bit Mac OSX Go binaries and checksum
-#   DIST_OSX_32,    DIST_OSX_32_SHA1    - 32 bit Mac OSX Go binaries and checksum
-#   DIST_WIN_64,    DIST_WIN_64_SHA1    - 64 bit Windows Go binaries and checksum
-#   DIST_WIN_32,    DIST_WIN_32_SHA1    - 32 bit Windows Go binaries and checksum
+#   DIST_LINUX_64,  DIST_LINUX_64_SHA  - 64 bit Linux Go binaries and checksum
+#   DIST_LINUX_32,  DIST_LINUX_32_SHA  - 32 bit Linux Go binaries and checksum
+#   DIST_LINUX_ARM, DIST_LINUX_ARM_SHA - ARM v5 Linux Go binaries and checksum
+#   DIST_OSX_64,    DIST_OSX_64_SHA    - 64 bit Mac OSX Go binaries and checksum
+#   DIST_OSX_32,    DIST_OSX_32_SHA    - 32 bit Mac OSX Go binaries and checksum
+#   DIST_WIN_64,    DIST_WIN_64_SHA    - 64 bit Windows Go binaries and checksum
+#   DIST_WIN_32,    DIST_WIN_32_SHA    - 32 bit Windows Go binaries and checksum
 set -e
 
 # Download and verify all the binary packages
-$FETCH $DIST_LINUX_64  $DIST_LINUX_64_SHA1
-$FETCH $DIST_LINUX_32  $DIST_LINUX_32_SHA1
-$FETCH $DIST_LINUX_ARM $DIST_LINUX_ARM_SHA1
-$FETCH $DIST_OSX_64    $DIST_OSX_64_SHA1
-$FETCH $DIST_OSX_32    $DIST_OSX_32_SHA1
-$FETCH $DIST_WIN_64    $DIST_WIN_64_SHA1
-$FETCH $DIST_WIN_32    $DIST_WIN_32_SHA1
+$FETCH $DIST_LINUX_64  $DIST_LINUX_64_SHA
+$FETCH $DIST_LINUX_32  $DIST_LINUX_32_SHA
+$FETCH $DIST_LINUX_ARM $DIST_LINUX_ARM_SHA
+$FETCH $DIST_OSX_64    $DIST_OSX_64_SHA
+$FETCH $DIST_OSX_32    $DIST_OSX_32_SHA
+$FETCH $DIST_WIN_64    $DIST_WIN_64_SHA
+$FETCH $DIST_WIN_32    $DIST_WIN_32_SHA
 
 # Extract the 64 bit Linux package as the primary Go SDK
 tar -C /usr/local -xzf `basename $DIST_LINUX_64`
