@@ -16,13 +16,27 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"strconv"
 	"strings"
 )
 
 // Path where to cache external dependencies
-var depsCache = filepath.Join(os.Getenv("HOME"), ".xgo-cache")
+var depsCache string
+
+func init() {
+	// Initialize the external dependency cache path to a few possible locations
+	if home := os.Getenv("HOME"); home != "" {
+		depsCache = filepath.Join(home, ".xgo-cache")
+		return
+	}
+	if user, err := user.Current(); user != nil && err == nil && user.HomeDir != "" {
+		depsCache = filepath.Join(user.HomeDir, ".xgo-cache")
+		return
+	}
+	depsCache = filepath.Join(os.TempDir(), "xgo-cache")
+}
 
 // Cross compilation docker containers
 var dockerBase = "karalabe/xgo-base"
@@ -115,7 +129,7 @@ func main() {
 	}
 	// Cache all external dependencies to prevent always hitting the internet
 	if *crossDeps != "" {
-		if err := os.MkdirAll(depsCache, 751); err != nil {
+		if err := os.MkdirAll(depsCache, 0751); err != nil {
 			log.Fatalf("Failed to create dependency cache: %v.", err)
 		}
 		// Download all missing dependencies
