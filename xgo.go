@@ -22,7 +22,7 @@ import (
 )
 
 // Path where to cache external dependencies
-var depsCache = filepath.Join(os.TempDir(), "xgo-cache")
+var depsCache = filepath.Join(os.Getenv("HOME"), ".xgo-cache")
 
 // Cross compilation docker containers
 var dockerBase = "karalabe/xgo-base"
