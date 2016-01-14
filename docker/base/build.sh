@@ -182,7 +182,7 @@ for TARGET in $TARGETS; do
         CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ HOST=arm-linux-androideabi PREFIX=/usr/$ANDROID_CHAIN_ARM/arm-linux-androideabi $BUILD_DEPS /deps ${DEPS_ARGS[@]}
         if [ $XGOARCH == "." ] || [ $XGOARCH == "arm" ]; then
           CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
-          CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$V $EXT_LDPIE $LD" $BM -o "/build/$NAME-android-$PLATFORM-arm`extension android`" ./$PACK
+          CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$V $EXT_LDAMD $EXT_LDPIE $LD" $BM -o "/build/$NAME-android-$PLATFORM-arm`extension android`" ./$PACK
         fi
         if [ $XGOARCH == "." ] || [ $XGOARCH == "aar" ]; then
           CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
