@@ -163,8 +163,6 @@ for TARGET in $TARGETS; do
     else
       unset CGO_CCPIE CGO_LDPIE EXT_LDPIE
     fi
-    EXT_LDAMD="-extldflags=-Wl,--allow-multiple-definition"
-
     mkdir -p /build-android-aar
 
     # Iterate over the requested architectures, bootstrap and build
@@ -172,6 +170,11 @@ for TARGET in $TARGETS; do
       if [ "$GO_VERSION" -lt 150 ]; then
         echo "Go version too low, skipping android-$PLATFORM/arm..."
       else
+        # Include a linker workaround for pre Go 1.6 releases
+        if [ "$GO_VERSION" -lt 160 ]; then
+          EXT_LDAMD="-extldflags=-Wl,--allow-multiple-definition"
+        fi
+
         echo "Assembling toolchain for android-$PLATFORM/arm..."
         $ANDROID_NDK_ROOT/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK_ROOT --install-dir=/usr/$ANDROID_CHAIN_ARM --toolchain=$ANDROID_CHAIN_ARM --arch=arm --system=linux-x86_64 > /dev/null 2>&1
 
@@ -182,7 +185,7 @@ for TARGET in $TARGETS; do
         CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ HOST=arm-linux-androideabi PREFIX=/usr/$ANDROID_CHAIN_ARM/arm-linux-androideabi $BUILD_DEPS /deps ${DEPS_ARGS[@]}
         if [ $XGOARCH == "." ] || [ $XGOARCH == "arm" ]; then
           CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
-          CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$V $EXT_LDPIE $LD" $BM -o "/build/$NAME-android-$PLATFORM-arm`extension android`" ./$PACK
+          CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$V $EXT_LDPIE $EXT_LDAMD $LD" $BM -o "/build/$NAME-android-$PLATFORM-arm`extension android`" ./$PACK
         fi
         if [ $XGOARCH == "." ] || [ $XGOARCH == "aar" ]; then
           CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
@@ -204,11 +207,11 @@ for TARGET in $TARGETS; do
         CC=i686-linux-android-gcc CXX=i686-linux-android-g++ HOST=i686-linux-android PREFIX=/usr/$ANDROID_CHAIN_386/i686-linux-android $BUILD_DEPS /deps ${DEPS_ARGS[@]}
         if [ $XGOARCH == "." ] || [ $XGOARCH == "386" ]; then
           CC=i686-linux-android-gcc CXX=i686-linux-android-g++ GOOS=android GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
-          CC=i686-linux-android-gcc CXX=i686-linux-android-g++ GOOS=android GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$V $EXT_LDPIE $EXT_LDAMD $LD" $BM -o "/build/$NAME-android-$PLATFORM-386`extension android`" ./$PACK
+          CC=i686-linux-android-gcc CXX=i686-linux-android-g++ GOOS=android GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$V $EXT_LDPIE $LD" $BM -o "/build/$NAME-android-$PLATFORM-386`extension android`" ./$PACK
         fi
         if [ $XGOARCH == "." ] || [ $XGOARCH == "aar" ]; then
           CC=i686-linux-android-gcc CXX=i686-linux-android-g++ GOOS=android GOARCH=386 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
-          CC=i686-linux-android-gcc CXX=i686-linux-android-g++ GOOS=android GOARCH=386 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $EXT_LDAMD $LD" --buildmode=c-shared -o "/build-android-aar/$NAME-android-$PLATFORM-386.so" ./$PACK
+          CC=i686-linux-android-gcc CXX=i686-linux-android-g++ GOOS=android GOARCH=386 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" --buildmode=c-shared -o "/build-android-aar/$NAME-android-$PLATFORM-386.so" ./$PACK
         fi
       fi
       if [ "$PLATFORM" -ge 21 ] && ([ $XGOARCH == "." ] || [ $XGOARCH == "arm64" ] || [ $XGOARCH == "aar" ]); then
@@ -222,11 +225,11 @@ for TARGET in $TARGETS; do
         CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ HOST=aarch64-linux-android PREFIX=/usr/$ANDROID_CHAIN_ARM64/aarch64-linux-android $BUILD_DEPS /deps ${DEPS_ARGS[@]}
         if [ $XGOARCH == "." ] || [ $XGOARCH == "arm64" ]; then
           CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ GOOS=android GOARCH=arm64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
-          CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ GOOS=android GOARCH=arm64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$V $EXT_LDPIE $EXT_LDAMD $LD" $BM -o "/build/$NAME-android-$PLATFORM-arm64`extension android`" ./$PACK
+          CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ GOOS=android GOARCH=arm64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$V $EXT_LDPIE $LD" $BM -o "/build/$NAME-android-$PLATFORM-arm64`extension android`" ./$PACK
         fi
         if [ $XGOARCH == "." ] || [ $XGOARCH == "aar" ]; then
           CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ GOOS=android GOARCH=arm64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
-          CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ GOOS=android GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $EXT_LDAMD $LD" --buildmode=c-shared -o "/build-android-aar/$NAME-android-$PLATFORM-arm64.so" ./$PACK
+          CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ GOOS=android GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" --buildmode=c-shared -o "/build-android-aar/$NAME-android-$PLATFORM-arm64.so" ./$PACK
         fi
       fi
     fi
