@@ -31,7 +31,7 @@ RUN \
     gcc-5-aarch64-linux-gnu g++-5-aarch64-linux-gnu libc6-dev-arm64-cross        \
     gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang-3.7 llvm-dev \
     libtool libxml2-dev uuid-dev libssl-dev swig openjdk-7-jdk pkg-config patch  \
-    make xz-utils cpio wget zip unzip p7zip git mercurial bzr --no-install-recommends
+    make xz-utils cpio wget zip unzip p7zip git mercurial bzr texinfo help2man --no-install-recommends
 
 # Fix any stock package issues
 RUN \
