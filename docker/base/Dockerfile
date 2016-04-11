@@ -68,7 +68,7 @@ ENV UPDATE_IOS /update_ios.sh
 RUN chmod +x $UPDATE_IOS
 
 RUN \
-  IOS_SDK_PATH=http://iphone.howett.net/sdks/dl/iPhoneOS8.1.sdk.tbz2 && \
+  IOS_SDK_PATH=https://jbdevs.org/sdks/dl/iPhoneOS8.1.sdk.tbz2       && \
   $FETCH $IOS_SDK_PATH 41203ed17a29743323cce0dd10b238efcea406e1      && \
   mv `basename $IOS_SDK_PATH` iPhoneOS8.1.sdk.tar.bz2                && \
   $UPDATE_IOS /iPhoneOS8.1.sdk.tar.bz2                               && \
