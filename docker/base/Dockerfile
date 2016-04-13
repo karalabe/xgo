@@ -40,12 +40,12 @@ RUN \
   ln -s /usr/bin/clang++-3.7 /usr/bin/clang++
 
 # Configure the container for OSX cross compilation
-ENV OSX_SDK     MacOSX10.9.sdk
+ENV OSX_SDK     MacOSX10.11.sdk
 ENV OSX_NDK_X86 /usr/local/osx-ndk-x86
 
 RUN \
-  OSX_SDK_PATH=https://s3.amazonaws.com/andrew-osx-sdks/MacOSX10.9.sdk.tar.xz && \
-  $FETCH $OSX_SDK_PATH e2f01f6dc7611df4783d2adc279d15132f4e9851               && \
+  OSX_SDK_PATH=https://s3.dockerproject.org/darwin/MacOSX10.11.sdk.tar.xz && \
+  $FETCH $OSX_SDK_PATH 2ee3f23247588763c42f5fdd04420454f6bf06f4           && \
   \
   git clone https://github.com/tpoechtrager/osxcross.git && \
   mv `basename $OSX_SDK_PATH` /osxcross/tarballs/        && \
@@ -68,11 +68,11 @@ ENV UPDATE_IOS /update_ios.sh
 RUN chmod +x $UPDATE_IOS
 
 RUN \
-  IOS_SDK_PATH=https://jbdevs.org/sdks/dl/iPhoneOS8.1.sdk.tbz2       && \
-  $FETCH $IOS_SDK_PATH 41203ed17a29743323cce0dd10b238efcea406e1      && \
-  mv `basename $IOS_SDK_PATH` iPhoneOS8.1.sdk.tar.bz2                && \
-  $UPDATE_IOS /iPhoneOS8.1.sdk.tar.bz2                               && \
-  rm -rf /iPhoneOS8.1.sdk.tar.bz2
+  IOS_SDK_PATH=https://jbdevs.org/sdks/dl/iPhoneOS9.3.sdk.tbz2  && \
+  $FETCH $IOS_SDK_PATH db5ecf91617abf26d3db99e769bd655b943905e5 && \
+  mv `basename $IOS_SDK_PATH` iPhoneOS9.3.sdk.tar.bz2           && \
+  $UPDATE_IOS /iPhoneOS9.3.sdk.tar.bz2                          && \
+  rm -rf /iPhoneOS9.3.sdk.tar.bz2
 
 # Configure the container for Android cross compilation
 ENV ANDROID_NDK         android-ndk-r10e

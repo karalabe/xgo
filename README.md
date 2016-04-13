@@ -206,8 +206,8 @@ The supported platforms are:
 
  * All Android APIs up to Android Lollipop 5.0 ([API level ids](https://source.android.com/source/build-numbers.html))
  * All Windows APIs up to Windows 8.1 limited by `mingw-w64` ([API level ids](https://en.wikipedia.org/wiki/Windows_NT#Releases))
- * OSX APIs in the range of 10.6 - 10.9
- * All iOS APIs up to ios 8.1
+ * OSX APIs in the range of 10.6 - 10.11
+ * All iOS APIs up to iOS 9.3
 
 ### CGO dependencies
 
