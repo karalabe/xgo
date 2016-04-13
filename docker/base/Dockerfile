@@ -44,8 +44,8 @@ ENV OSX_SDK     MacOSX10.11.sdk
 ENV OSX_NDK_X86 /usr/local/osx-ndk-x86
 
 RUN \
-  OSX_SDK_PATH=https://s3.dockerproject.org/darwin/MacOSX10.11.sdk.tar.xz && \
-  $FETCH $OSX_SDK_PATH 2ee3f23247588763c42f5fdd04420454f6bf06f4           && \
+  OSX_SDK_PATH=https://s3.dockerproject.org/darwin/v2/$OSX_SDK.tar.xz && \
+  $FETCH $OSX_SDK_PATH dd228a335194e3392f1904ce49aff1b1da26ca62       && \
   \
   git clone https://github.com/tpoechtrager/osxcross.git && \
   mv `basename $OSX_SDK_PATH` /osxcross/tarballs/        && \
@@ -56,6 +56,7 @@ RUN \
   \
   rm -rf /osxcross
 
+ADD patch.tar.xz $OSX_NDK_X86/SDK/$OSX_SDK/usr/include/c++
 ENV PATH $OSX_NDK_X86/bin:$PATH
 
 # Configure the container for iOS cross compilation
