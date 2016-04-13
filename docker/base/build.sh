@@ -183,6 +183,8 @@ for TARGET in $TARGETS; do
 
         echo "Compiling for android-$PLATFORM/arm..."
         CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ HOST=arm-linux-androideabi PREFIX=/usr/$ANDROID_CHAIN_ARM/arm-linux-androideabi $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+        export PKG_CONFIG_PATH=/usr/$ANDROID_CHAIN_ARM/arm-linux-androideabi/lib/pkgconfig
+
         if [ $XGOARCH == "." ] || [ $XGOARCH == "arm" ]; then
           CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
           CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$V $EXT_LDPIE $EXT_LDAMD $LD" $BM -o "/build/$NAME-android-$PLATFORM-arm`extension android`" ./$PACK
@@ -205,6 +207,8 @@ for TARGET in $TARGETS; do
 
         echo "Compiling for android-$PLATFORM/386..."
         CC=i686-linux-android-gcc CXX=i686-linux-android-g++ HOST=i686-linux-android PREFIX=/usr/$ANDROID_CHAIN_386/i686-linux-android $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+        export PKG_CONFIG_PATH=/usr/$ANDROID_CHAIN_386/i686-linux-android/lib/pkgconfig
+
         if [ $XGOARCH == "." ] || [ $XGOARCH == "386" ]; then
           CC=i686-linux-android-gcc CXX=i686-linux-android-g++ GOOS=android GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
           CC=i686-linux-android-gcc CXX=i686-linux-android-g++ GOOS=android GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$V $EXT_LDPIE $LD" $BM -o "/build/$NAME-android-$PLATFORM-386`extension android`" ./$PACK
@@ -223,6 +227,8 @@ for TARGET in $TARGETS; do
 
         echo "Compiling for android-$PLATFORM/arm64..."
         CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ HOST=aarch64-linux-android PREFIX=/usr/$ANDROID_CHAIN_ARM64/aarch64-linux-android $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+        export PKG_CONFIG_PATH=/usr/$ANDROID_CHAIN_ARM64/aarch64-linux-android/lib/pkgconfig
+
         if [ $XGOARCH == "." ] || [ $XGOARCH == "arm64" ]; then
           CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ GOOS=android GOARCH=arm64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
           CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ GOOS=android GOARCH=arm64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_CXXFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go build $V $X "${T[@]}" --ldflags="$V $EXT_LDPIE $LD" $BM -o "/build/$NAME-android-$PLATFORM-arm64`extension android`" ./$PACK
@@ -308,6 +314,8 @@ for TARGET in $TARGETS; do
     fi
     echo "Compiling for linux/arm-5..."
     CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 HOST=arm-linux-gnueabi PREFIX=/usr/arm-linux-gnueabi CFLAGS="-march=armv5" CXXFLAGS="-march=armv5" $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+    export PKG_CONFIG_PATH=/usr/arm-linux-gnueabi/lib/pkgconfig
+
     CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 GOOS=linux GOARCH=arm GOARM=5 CGO_ENABLED=1 CGO_CFLAGS="-march=armv5" CGO_CXXFLAGS="-march=armv5" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
     CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 GOOS=linux GOARCH=arm GOARM=5 CGO_ENABLED=1 CGO_CFLAGS="-march=armv5" CGO_CXXFLAGS="-march=armv5" go build $V $X "${T[@]}" --ldflags="$V $LD" $BM -o "/build/$NAME-linux-arm-5`extension linux`" ./$PACK
     if [ "$GO_VERSION" -ge 150 ]; then
@@ -324,6 +332,8 @@ for TARGET in $TARGETS; do
 
       echo "Compiling for linux/arm-6..."
       CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 HOST=arm-linux-gnueabi PREFIX=/usr/arm-linux-gnueabi CFLAGS="-march=armv6" CXXFLAGS="-march=armv6" $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      export PKG_CONFIG_PATH=/usr/arm-linux-gnueabi/lib/pkgconfig
+
       CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 GOOS=linux GOARCH=arm GOARM=6 CGO_ENABLED=1 CGO_CFLAGS="-march=armv6" CGO_CXXFLAGS="-march=armv6" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
       CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 GOOS=linux GOARCH=arm GOARM=6 CGO_ENABLED=1 CGO_CFLAGS="-march=armv6" CGO_CXXFLAGS="-march=armv6" go build $V $X "${T[@]}" --ldflags="$V $LD" $BM -o "/build/$NAME-linux-arm-6`extension linux`" ./$PACK
 
@@ -340,6 +350,8 @@ for TARGET in $TARGETS; do
 
       echo "Compiling for linux/arm-7..."
       CC=arm-linux-gnueabihf-gcc-5 CXX=arm-linux-gnueabihf-g++-5 HOST=arm-linux-gnueabihf PREFIX=/usr/arm-linux-gnueabihf CFLAGS="-march=armv7-a -fPIC" CXXFLAGS="-march=armv7-a -fPIC" $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      export PKG_CONFIG_PATH=/usr/arm-linux-gnueabihf/lib/pkgconfig
+
       CC=arm-linux-gnueabihf-gcc-5 CXX=arm-linux-gnueabihf-g++-5 GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="-march=armv7-a -fPIC" CGO_CXXFLAGS="-march=armv7-a -fPIC" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
       CC=arm-linux-gnueabihf-gcc-5 CXX=arm-linux-gnueabihf-g++-5 GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="-march=armv7-a -fPIC" CGO_CXXFLAGS="-march=armv7-a -fPIC" go build $V $X "${T[@]}" --ldflags="$V $LD" $BM -o "/build/$NAME-linux-arm-7`extension linux`" ./$PACK
 
@@ -353,6 +365,8 @@ for TARGET in $TARGETS; do
     else
       echo "Compiling for linux/arm64..."
       CC=aarch64-linux-gnu-gcc-5 CXX=aarch64-linux-gnu-g++-5 HOST=aarch64-linux-gnu PREFIX=/usr/aarch64-linux-gnu $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      export PKG_CONFIG_PATH=/usr/aarch64-linux-gnu/lib/pkgconfig
+
       CC=aarch64-linux-gnu-gcc-5 CXX=aarch64-linux-gnu-g++-5 GOOS=linux GOARCH=arm64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
       CC=aarch64-linux-gnu-gcc-5 CXX=aarch64-linux-gnu-g++-5 GOOS=linux GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" $BM -o "/build/$NAME-linux-arm64`extension linux`" ./$PACK
     fi
@@ -375,12 +389,16 @@ for TARGET in $TARGETS; do
     if [ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]; then
       echo "Compiling for windows-$PLATFORM/amd64..."
       CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix HOST=x86_64-w64-mingw32 PREFIX=/usr/x86_64-w64-mingw32 $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      export PKG_CONFIG_PATH=/usr/x86_64-w64-mingw32/lib/pkgconfig
+
       CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
       CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go build $V $X "${T[@]}" --ldflags="$V $LD" $R $BM -o "/build/$NAME-windows-$PLATFORM-amd64$R`extension windows`" ./$PACK
     fi
     if [ $XGOARCH == "." ] || [ $XGOARCH == "386" ]; then
       echo "Compiling for windows-$PLATFORM/386..."
       CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix HOST=i686-w64-mingw32 PREFIX=/usr/i686-w64-mingw32 $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      export PKG_CONFIG_PATH=/usr/i686-w64-mingw32/lib/pkgconfig
+
       CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix GOOS=windows GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
       CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix GOOS=windows GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go build $V $X "${T[@]}" --ldflags="$V $LD" $BM -o "/build/$NAME-windows-$PLATFORM-386`extension windows`" ./$PACK
     fi
