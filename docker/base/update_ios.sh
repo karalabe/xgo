@@ -35,6 +35,9 @@ if [[ "`basename $1`" =~ ^iPhoneSimulator ]]; then
   ln -s $OSX_NDK_X86/SDK/$OSX_SDK/usr/lib/system/libsystem_kernel.dylib   $sdk/usr/lib/system/libsystem_kernel.dylib
   ln -s $OSX_NDK_X86/SDK/$OSX_SDK/usr/lib/system/libsystem_platform.dylib $sdk/usr/lib/system/libsystem_platform.dylib
   ln -s $OSX_NDK_X86/SDK/$OSX_SDK/usr/lib/system/libsystem_pthread.dylib  $sdk/usr/lib/system/libsystem_pthread.dylib
+  ln -s $OSX_NDK_X86/SDK/$OSX_SDK/usr/lib/system/libsystem_kernel.tbd     $sdk/usr/lib/system/libsystem_kernel.tbd
+  ln -s $OSX_NDK_X86/SDK/$OSX_SDK/usr/lib/system/libsystem_platform.tbd   $sdk/usr/lib/system/libsystem_platform.tbd
+  ln -s $OSX_NDK_X86/SDK/$OSX_SDK/usr/lib/system/libsystem_pthread.tbd    $sdk/usr/lib/system/libsystem_pthread.tbd
 fi
 
 tar -czf /tmp/$sdk.tar.gz $sdk
