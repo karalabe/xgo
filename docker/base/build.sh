@@ -260,34 +260,39 @@ for TARGET in $TARGETS; do
 
       # Generate the JNI wrappers automatically with SWIG
       jni=`mktemp -d`
-      cp `find /build-android-aar | grep '\.h$' | head -n 1` $jni/$NAME.h
-      sed -i -e 's|__complex|complex|g' $jni/$NAME.h
-      sed -i -e 's|_Complex|complex|g' $jni/$NAME.h
-      echo -e "%module $title\n%{\n#include \"$NAME.h\"\n%}\n%pragma(java) jniclasscode=%{\nstatic {\nSystem.loadLibrary(\"$NAME\");\n}\n%}\n%include \"$NAME.h\"" > $jni/$NAME.i
+      header=`find /build-android-aar | grep '\.h$' | head -n 1`
+      if [ "$header" == "" ]; then
+        echo "No API C header specified, skipping android-$PLATFORM/aar..."
+      else
+        cp $header $jni/$NAME.h
+        sed -i -e 's|__complex|complex|g' $jni/$NAME.h
+        sed -i -e 's|_Complex|complex|g' $jni/$NAME.h
+        echo -e "%module $title\n%{\n#include \"$NAME.h\"\n%}\n%pragma(java) jniclasscode=%{\nstatic {\nSystem.loadLibrary(\"$NAME\");\n}\n%}\n%include \"$NAME.h\"" > $jni/$NAME.i
 
-      mkdir -p $jni/${package//.//}
-      swig -java -package $package -outdir $jni/${package//.//} $jni/$NAME.i
+        mkdir -p $jni/${package//.//}
+        swig -java -package $package -outdir $jni/${package//.//} $jni/$NAME.i
 
-      # Assemble the Go static libraries and the JNI interface into shared libraries
-      for lib in `find /build-android-aar | grep '\.so$'`; do
-        if [[ "$lib" = *-arm.so ]];   then cc=arm-linux-androideabi-gcc; abi="armeabi-v7a"; fi
-        if [[ "$lib" = *-arm64.so ]]; then cc=aarch64-linux-android-gcc; abi="arm64-v8a"; fi
-        if [[ "$lib" = *-386.so ]];   then cc=i686-linux-android-gcc;    abi="x86"; fi
+        # Assemble the Go static libraries and the JNI interface into shared libraries
+        for lib in `find /build-android-aar | grep '\.so$'`; do
+          if [[ "$lib" = *-arm.so ]];   then cc=arm-linux-androideabi-gcc; abi="armeabi-v7a"; fi
+          if [[ "$lib" = *-arm64.so ]]; then cc=aarch64-linux-android-gcc; abi="arm64-v8a"; fi
+          if [[ "$lib" = *-386.so ]];   then cc=i686-linux-android-gcc;    abi="x86"; fi
 
-        mkdir -p $archive/jni/$abi
-        cp ${lib%.*}.h $jni/${NAME}.h
-        cp $lib $archive/jni/$abi/lib${NAME}raw.so
-        (cd $archive/jni/$abi && $cc -shared -fPIC -o lib${NAME}.so -I"$ANDROID_NDK_LIBC/include" -I"$ANDROID_NDK_LIBC/libs/$abi/include" -I"$jni" lib${NAME}raw.so $jni/${NAME}_wrap.c)
-      done
+          mkdir -p $archive/jni/$abi
+          cp ${lib%.*}.h $jni/${NAME}.h
+          cp $lib $archive/jni/$abi/lib${NAME}raw.so
+          (cd $archive/jni/$abi && $cc -shared -fPIC -o lib${NAME}.so -I"$ANDROID_NDK_LIBC/include" -I"$ANDROID_NDK_LIBC/libs/$abi/include" -I"$jni" lib${NAME}raw.so $jni/${NAME}_wrap.c)
+        done
 
-      # Compile the Java wrapper and assemble into a .jar file
-      mkdir -p $jni/build
-      javac -cp . -d $jni/build $jni/${package//.//}/*.java
-      (cd $jni/build && jar cvf $archive/classes.jar *)
+        # Compile the Java wrapper and assemble into a .jar file
+        mkdir -p $jni/build
+        javac -cp . -d $jni/build $jni/${package//.//}/*.java
+        (cd $jni/build && jar cvf $archive/classes.jar *)
 
-      # Finally assemble the archive contents into an .aar and clean up
-      (cd $archive && zip -r $bundle *)
-      rm -rf $jni $archive
+        # Finally assemble the archive contents into an .aar and clean up
+        (cd $archive && zip -r $bundle *)
+        rm -rf $jni $archive
+      fi
     fi
     # Clean up the android builds, toolchains and runtimes
     rm -rf /build-android-aar
