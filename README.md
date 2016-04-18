@@ -91,13 +91,13 @@ You can select which Go release to work with through the `-go` command line flag
 to xgo and if the specific release was already integrated, it will automatically
 be retrieved and installed.
 
-    $ xgo -go 1.5.1 github.com/project-iris/iris
+    $ xgo -go 1.6.1 github.com/project-iris/iris
 
 Additionally, a few wildcard release strings are also supported:
 
   - `latest` will use the latest Go release (this is the default)
-  - `1.5.x` will use the latest point release of a specific Go version
-  - `1.5-develop` will use the develop branch of a specific Go version
+  - `1.6.x` will use the latest point release of a specific Go version
+  - `1.6-develop` will use the develop branch of a specific Go version
   - `develop` will use the develop branch of the entire Go repository
 
 ### Output prefixing
@@ -189,6 +189,11 @@ argument:
   * `--targets=*/arm`: builds ARM binaries for all platforms
   * `--targets=*/*`: builds all suppoted targets (default)
 
+The supported targets are:
+
+ * Platforms: `android`, `darwin`, `ios`, `linux`, `windows`
+ * Achitectures: `386`, `amd64`, `arm-5`, `arm-6`, `arm-7`, `arm64`
+
 ### Platform versions
 
 By default `xgo` tries to cross compile to the lowest possible versions of every
@@ -208,6 +213,22 @@ The supported platforms are:
  * All Windows APIs up to Windows 8.1 limited by `mingw-w64` ([API level ids](https://en.wikipedia.org/wiki/Windows_NT#Releases))
  * OSX APIs in the range of 10.6 - 10.11
  * All iOS APIs up to iOS 9.3
+
+### Mobile libraries
+
+Apart from the usual runnable binaries, `xgo` also supports building library
+archives for Android (`android/aar`) and iOS (`ios/framework`). Opposed to
+`gomobile` however `xgo` does not derive library APIs from the Go code, so
+proper CGO C external methods must be defined within the package.
+
+In the case of Android archives, all architectures will be bundled that are
+supported by the requested Android platform version. For iOS frameworks `xgo`
+will bundle armv7 and arm64 by default, and also the x86_64 simulator builds
+if the iPhoneSimulator.sdk was injected by the user:
+
+* Create a new docker image based on xgo: `FROM karalabe/xgo-latest`
+* Inject the simulator SDK: `ADD iPhoneSimulator9.3.sdk.tar.xz /iPhoneSimulator9.3.sdk.tar.xz`
+* Bootstrap the simulator SDK: `$UPDATE_IOS /iPhoneSimulator9.3.sdk.tar.xz`
 
 ### CGO dependencies
 
