@@ -176,7 +176,7 @@ for TARGET in $TARGETS; do
         fi
 
         echo "Assembling toolchain for android-$PLATFORM/arm..."
-        $ANDROID_NDK_ROOT/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK_ROOT --install-dir=/usr/$ANDROID_CHAIN_ARM --toolchain=$ANDROID_CHAIN_ARM --arch=arm --system=linux-x86_64 > /dev/null 2>&1
+        $ANDROID_NDK_ROOT/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK_ROOT --install-dir=/usr/$ANDROID_CHAIN_ARM --toolchain=$ANDROID_CHAIN_ARM --arch=arm > /dev/null 2>&1
 
         echo "Bootstrapping android-$PLATFORM/arm..."
         CC=arm-linux-androideabi-gcc GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go install std
@@ -200,7 +200,7 @@ for TARGET in $TARGETS; do
     else
       if [ "$PLATFORM" -ge 9 ] && ([ $XGOARCH == "." ] || [ $XGOARCH == "386" ] || [ $XGOARCH == "aar" ]); then
         echo "Assembling toolchain for android-$PLATFORM/386..."
-        $ANDROID_NDK_ROOT/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK_ROOT --install-dir=/usr/$ANDROID_CHAIN_386 --toolchain=$ANDROID_CHAIN_386 --arch=x86 --system=linux-x86_64 > /dev/null 2>&1
+        $ANDROID_NDK_ROOT/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK_ROOT --install-dir=/usr/$ANDROID_CHAIN_386 --toolchain=$ANDROID_CHAIN_386 --arch=x86 > /dev/null 2>&1
 
         echo "Bootstrapping android-$PLATFORM/386..."
         CC=i686-linux-android-gcc GOOS=android GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go install std
@@ -220,7 +220,7 @@ for TARGET in $TARGETS; do
       fi
       if [ "$PLATFORM" -ge 21 ] && ([ $XGOARCH == "." ] || [ $XGOARCH == "arm64" ] || [ $XGOARCH == "aar" ]); then
         echo "Assembling toolchain for android-$PLATFORM/arm64..."
-        $ANDROID_NDK_ROOT/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK_ROOT --install-dir=/usr/$ANDROID_CHAIN_ARM64 --toolchain=$ANDROID_CHAIN_ARM64 --arch=arm64 --system=linux-x86_64 > /dev/null 2>&1
+        $ANDROID_NDK_ROOT/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK_ROOT --install-dir=/usr/$ANDROID_CHAIN_ARM64 --toolchain=$ANDROID_CHAIN_ARM64 --arch=arm64 > /dev/null 2>&1
 
         echo "Bootstrapping android-$PLATFORM/arm64..."
         CC=aarch64-linux-android-gcc GOOS=android GOARCH=arm64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go install std

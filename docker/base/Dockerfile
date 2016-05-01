@@ -74,8 +74,8 @@ RUN \
   rm -rf /iPhoneOS9.3.sdk.tar.bz2
 
 # Configure the container for Android cross compilation
-ENV ANDROID_NDK         android-ndk-r10e
-ENV ANDROID_NDK_PATH    http://dl.google.com/android/ndk/$ANDROID_NDK-linux-x86_64.bin
+ENV ANDROID_NDK         android-ndk-r11c
+ENV ANDROID_NDK_PATH    http://dl.google.com/android/repository/$ANDROID_NDK-linux-x86_64.zip
 ENV ANDROID_NDK_ROOT    /usr/local/$ANDROID_NDK
 ENV ANDROID_NDK_LIBC    $ANDROID_NDK_ROOT/sources/cxx-stl/gnu-libstdc++/4.9
 ENV ANDROID_PLATFORM    21
@@ -84,20 +84,20 @@ ENV ANDROID_CHAIN_ARM64 aarch64-linux-android-4.9
 ENV ANDROID_CHAIN_386   x86-4.9
 
 RUN \
-  $FETCH $ANDROID_NDK_PATH c685e5f106f8daa9b5449d0a4f21ee8c0afcb2f6 && \
-  7zr x `basename $ANDROID_NDK_PATH` \
-    "$ANDROID_NDK/build"                                           \
-    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/include"       \
-    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi*" \
-    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64*"   \
-    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/libs/x86"      \
-    "$ANDROID_NDK/prebuilt/linux-x86_64"                           \
-    "$ANDROID_NDK/platforms/*/arch-arm"                            \
-    "$ANDROID_NDK/platforms/*/arch-arm64"                          \
-    "$ANDROID_NDK/platforms/*/arch-x86"                            \
-    "$ANDROID_NDK/toolchains/$ANDROID_CHAIN_ARM"                   \
-    "$ANDROID_NDK/toolchains/$ANDROID_CHAIN_ARM64"                 \
-    "$ANDROID_NDK/toolchains/$ANDROID_CHAIN_386" -o/usr/local > /dev/null && \
+  $FETCH $ANDROID_NDK_PATH de5ce9bddeee16fb6af2b9117e9566352aa7e279 && \
+  unzip `basename $ANDROID_NDK_PATH` \
+    "$ANDROID_NDK/build/*"                                           \
+    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/include/*"       \
+    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi*/*" \
+    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64*/*"   \
+    "$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.9/libs/x86/*"      \
+    "$ANDROID_NDK/prebuilt/linux-x86_64/*"                           \
+    "$ANDROID_NDK/platforms/*/arch-arm/*"                            \
+    "$ANDROID_NDK/platforms/*/arch-arm64/*"                          \
+    "$ANDROID_NDK/platforms/*/arch-x86/*"                            \
+    "$ANDROID_NDK/toolchains/$ANDROID_CHAIN_ARM/*"                   \
+    "$ANDROID_NDK/toolchains/$ANDROID_CHAIN_ARM64/*"                 \
+    "$ANDROID_NDK/toolchains/$ANDROID_CHAIN_386/*" -d /usr/local > /dev/null && \
   rm -f `basename $ANDROID_NDK_PATH`
 
 ENV PATH /usr/$ANDROID_CHAIN_ARM/bin:$PATH
