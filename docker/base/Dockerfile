@@ -3,7 +3,7 @@
 #
 # Released under the MIT license.
 
-FROM ubuntu:15.10
+FROM ubuntu:16.04
 
 MAINTAINER Péter Szilágyi <peterke@gmail.com>
 
@@ -25,19 +25,17 @@ RUN chmod +x $FETCH
 # Make sure apt-get is up to date and dependent packages are installed
 RUN \
   apt-get update && \
-  apt-get install -y automake autogen build-essential ca-certificates            \
-    gcc-5-arm-linux-gnueabi g++-5-arm-linux-gnueabi libc6-dev-armel-cross        \
-    gcc-5-arm-linux-gnueabihf g++-5-arm-linux-gnueabihf libc6-dev-armhf-cross    \
-    gcc-5-aarch64-linux-gnu g++-5-aarch64-linux-gnu libc6-dev-arm64-cross        \
-    gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang-3.7 llvm-dev \
-    libtool libxml2-dev uuid-dev libssl-dev swig openjdk-7-jdk pkg-config patch  \
-    make xz-utils cpio wget zip unzip p7zip git mercurial bzr texinfo help2man --no-install-recommends
+  apt-get install -y automake autogen build-essential ca-certificates           \
+    gcc-5-arm-linux-gnueabi g++-5-arm-linux-gnueabi libc6-dev-armel-cross       \
+    gcc-5-arm-linux-gnueabihf g++-5-arm-linux-gnueabihf libc6-dev-armhf-cross   \
+    gcc-5-aarch64-linux-gnu g++-5-aarch64-linux-gnu libc6-dev-arm64-cross       \
+    gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev    \
+    libtool libxml2-dev uuid-dev libssl-dev swig openjdk-8-jdk pkg-config patch \
+    make xz-utils cpio wget zip unzip p7zip git mercurial bzr texinfo help2man  \
+    --no-install-recommends
 
 # Fix any stock package issues
-RUN \
-  ln -s /usr/include/asm-generic /usr/include/asm && \
-  ln -s /usr/bin/clang-3.7 /usr/bin/clang         && \
-  ln -s /usr/bin/clang++-3.7 /usr/bin/clang++
+RUN ln -s /usr/include/asm-generic /usr/include/asm
 
 # Configure the container for OSX cross compilation
 ENV OSX_SDK     MacOSX10.11.sdk
