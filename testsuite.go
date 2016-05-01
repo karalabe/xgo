@@ -27,7 +27,7 @@ var layers = []struct {
 	dir string
 }{
 	{"karalabe/xgo-base", "base"},
-	{"karalabe/xgo-1.6.1", "go-1.6.1"},
+	{"karalabe/xgo-1.6.2", "go-1.6.2"},
 	{"karalabe/xgo-1.6.x", "go-1.6.x"},
 	{"karalabe/xgo-latest", "go-latest"},
 	//{"karalabe/xgo-latest-ios", "go-latest-ios"}, // Non-public layer (XCode licensing)
