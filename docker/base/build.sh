@@ -105,7 +105,8 @@ else
     if [ "$REPO_BRANCH" != "" ]; then
       echo "Switching over to branch $REPO_BRANCH..."
       if [ "$REPO_TYPE" == "git" ]; then
-        git checkout $REPO_BRANCH
+        git reset --hard origin/$REPO_BRANCH
+        git clean -dxf
       elif [ "$REPO_TYPE" == "hg" ]; then
         hg checkout $REPO_BRANCH
       fi
