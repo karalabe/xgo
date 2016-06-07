@@ -94,7 +94,9 @@ else
       echo "Switching over to remote $REPO_REMOTE..."
       if [ "$REPO_TYPE" == "git" ]; then
         git remote set-url origin $REPO_REMOTE
-        git pull
+        git fetch --all
+        git reset --hard origin/HEAD
+        git clean -dxf
       elif [ "$REPO_TYPE" == "hg" ]; then
         echo -e "[paths]\ndefault = $REPO_REMOTE\n" >> .hg/hgrc
         hg pull
@@ -103,7 +105,8 @@ else
     if [ "$REPO_BRANCH" != "" ]; then
       echo "Switching over to branch $REPO_BRANCH..."
       if [ "$REPO_TYPE" == "git" ]; then
-        git checkout $REPO_BRANCH
+        git reset --hard origin/$REPO_BRANCH
+        git clean -dxf
       elif [ "$REPO_TYPE" == "hg" ]; then
         hg checkout $REPO_BRANCH
       fi
