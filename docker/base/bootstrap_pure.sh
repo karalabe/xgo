@@ -33,6 +33,14 @@ GOOS=linux GOARCH=386 CGO_ENABLED=1 go install std
 echo "Bootstrapping linux/arm64..."
 GOOS=linux GOARCH=arm64 CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc-5 go install std
 
+if [ $GO_VERSION -ge 170 ]; then
+  echo "Bootstrapping linux/mips64..."
+  GOOS=linux GOARCH=mips64 CGO_ENABLED=1 CC=mips64-linux-gnuabi64-gcc-5 go install std
+
+  echo "Bootstrapping linux/mips64le..."
+  GOOS=linux GOARCH=mips64le CGO_ENABLED=1 CC=mips64el-linux-gnuabi64-gcc-5 go install std
+fi
+
 echo "Bootstrapping windows/amd64..."
 GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go install std
 

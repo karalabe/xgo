@@ -25,13 +25,15 @@ RUN chmod +x $FETCH
 # Make sure apt-get is up to date and dependent packages are installed
 RUN \
   apt-get update && \
-  apt-get install -y automake autogen build-essential ca-certificates           \
-    gcc-5-arm-linux-gnueabi g++-5-arm-linux-gnueabi libc6-dev-armel-cross       \
-    gcc-5-arm-linux-gnueabihf g++-5-arm-linux-gnueabihf libc6-dev-armhf-cross   \
-    gcc-5-aarch64-linux-gnu g++-5-aarch64-linux-gnu libc6-dev-arm64-cross       \
-    gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev    \
-    libtool libxml2-dev uuid-dev libssl-dev swig openjdk-8-jdk pkg-config patch \
-    make xz-utils cpio wget zip unzip p7zip git mercurial bzr texinfo help2man  \
+  apt-get install -y automake autogen build-essential ca-certificates                    \
+    gcc-5-arm-linux-gnueabi g++-5-arm-linux-gnueabi libc6-dev-armel-cross                \
+    gcc-5-arm-linux-gnueabihf g++-5-arm-linux-gnueabihf libc6-dev-armhf-cross            \
+    gcc-5-aarch64-linux-gnu g++-5-aarch64-linux-gnu libc6-dev-arm64-cross                \
+    gcc-5-mips64-linux-gnuabi64 g++-5-mips64-linux-gnuabi64 libc6-dev-mips64-cross       \
+    gcc-5-mips64el-linux-gnuabi64 g++-5-mips64el-linux-gnuabi64 libc6-dev-mips64el-cross \
+    gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev             \
+    libtool libxml2-dev uuid-dev libssl-dev swig openjdk-8-jdk pkg-config patch          \
+    make xz-utils cpio wget zip unzip p7zip git mercurial bzr texinfo help2man           \
     --no-install-recommends
 
 # Fix any stock package issues
