@@ -289,7 +289,7 @@ for TARGET in $TARGETS; do
 
         # Compile the Java wrapper and assemble into a .jar file
         mkdir -p $jni/build
-        javac -cp . -d $jni/build $jni/${package//.//}/*.java
+        javac -target 1.7 -source 1.7 -cp . -d $jni/build $jni/${package//.//}/*.java
         (cd $jni/build && jar cvf $archive/classes.jar *)
 
         # Finally assemble the archive contents into an .aar and clean up
