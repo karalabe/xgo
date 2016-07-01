@@ -17,6 +17,16 @@ function build_image() {
     bash -c "cd ${folder} && docker build -t ${name}:${version} ."
 }
 
+function build_image_file() {
+    local dockerfile=$1
+    local name=$2
+    local version=$3
+
+    local fixed_dockerfile=$(cat ${dockerfile} | sed -E "s/FROM (.*)$/FROM \\1:${version}/")
+
+    bash -c "echo '${fixed_dockerfile}' | docker build -t ${name}:${version} -"
+}
+
 function get_version() {
     cat "${DIR}/VERSION"
 }
@@ -37,7 +47,7 @@ function main() {
     for goVersion in $(subdirs "${DIR}/docker" | grep -v base | sed 's/^go-//'); do
         echo
         echo "Building ${goVersion}"
-        build_image "${DIR}/go-${goVersion}" "${IMAGE_PREFIX}-${goVersion}" "${version}"
+        build_image_file "${DIR}/docker/go-${goVersion}/Dockerfile" "${IMAGE_PREFIX}-${goVersion}" "${version}"
     done
 }
 
