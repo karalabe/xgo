@@ -37,6 +37,10 @@ function subdirs() {
     bash -c "cd ${folder} && ls -d */" | sed 's/\/$//'
 }
 
+function go_versions() {
+    subdirs "${DIR}/docker" | grep -v base | grep -v latest | sed 's/^go-//'
+}
+
 function main() {
     # Get ver
     local version=$(get_version)
@@ -47,7 +51,7 @@ function main() {
     # Run builds in parallel
     local N=4
     local i=0
-    for goVersion in $(subdirs "${DIR}/docker" | grep -v base | grep -v "latest" | sed 's/^go-//'); do
+    for goVersion in $(go_versions | grep -v ".x"); do
         ((i=i%N)); ((i++==0)) && wait
         echo
         echo "Building ${goVersion}"
@@ -56,7 +60,15 @@ function main() {
     # Wait for all tasks to be finished
     wait
 
+    # Build .x versions (quick and easy to build since they simply refer to other images)
+    for goVersion in $(go_versions | grep ".x"); do
+        echo
+        echo "Building ${goVersion}"
+        build_image_file "${DIR}/docker/go-${goVersion}/Dockerfile" "${IMAGE_PREFIX}-${goVersion}" "${version}"
+    done
+
     # Build go-latest last (since it depends on earlier builds)
+    echo
     echo "Building latest"
     build_image_file "${DIR}/docker/go-latest/Dockerfile" "${IMAGE_PREFIX}-latest" "${version}"
 }
