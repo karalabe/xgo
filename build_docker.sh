@@ -47,7 +47,7 @@ function main() {
     # Run builds in parallel
     local N=4
     local i=0
-    for goVersion in $(subdirs "${DIR}/docker" | grep -v base | grep "1.6" | sed 's/^go-//'); do
+    for goVersion in $(subdirs "${DIR}/docker" | grep -v base | grep -v "latest" | sed 's/^go-//'); do
         ((i=i%N)); ((i++==0)) && wait
         echo
         echo "Building ${goVersion}"
@@ -55,6 +55,10 @@ function main() {
     done
     # Wait for all tasks to be finished
     wait
+
+    # Build go-latest last (since it depends on earlier builds)
+    echo "Building latest"
+    build_image_file "${DIR}/docker/go-latest/Dockerfile" "${IMAGE_PREFIX}-latest" "${version}"
 }
 
 # Run main
