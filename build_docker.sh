@@ -14,7 +14,7 @@ function build_image() {
     local name=$2
     local version=$3
 
-    bash -c "cd ${folder} && docker build -t ${name}:${version} ."
+    docker build -t ${name}:${version} ${folder}
 }
 
 function build_image_file() {
@@ -24,7 +24,7 @@ function build_image_file() {
 
     local fixed_dockerfile=$(cat ${dockerfile} | sed -E "s/FROM (.*)$/FROM \\1:${version}/")
 
-    bash -c "echo '${fixed_dockerfile}' | docker build -t ${name}:${version} -"
+    echo "${fixed_dockerfile}" | docker build -t "${name}:${version}" -
 }
 
 function get_version() {
@@ -49,6 +49,8 @@ function main() {
         echo "Building ${goVersion}"
         build_image_file "${DIR}/docker/go-${goVersion}/Dockerfile" "${IMAGE_PREFIX}-${goVersion}" "${version}"
     done
+    # Wait for all tasks to be finished
+    wait
 }
 
 # Run main
