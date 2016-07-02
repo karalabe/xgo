@@ -44,10 +44,14 @@ function main() {
     echo "Building base"
     build_image "${DIR}/docker/base" "${IMAGE_PREFIX}-base" "${version}"
 
-    for goVersion in $(subdirs "${DIR}/docker" | grep -v base | sed 's/^go-//'); do
+    # Run builds in parallel
+    local N=4
+    local i=0
+    for goVersion in $(subdirs "${DIR}/docker" | grep -v base | grep "1.6" | sed 's/^go-//'); do
+        ((i=i%N)); ((i++==0)) && wait
         echo
         echo "Building ${goVersion}"
-        build_image_file "${DIR}/docker/go-${goVersion}/Dockerfile" "${IMAGE_PREFIX}-${goVersion}" "${version}"
+        build_image_file "${DIR}/docker/go-${goVersion}/Dockerfile" "${IMAGE_PREFIX}-${goVersion}" "${version}" &
     done
     # Wait for all tasks to be finished
     wait
