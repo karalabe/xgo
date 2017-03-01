@@ -41,6 +41,14 @@ if [ $GO_VERSION -ge 170 ]; then
   GOOS=linux GOARCH=mips64le CGO_ENABLED=1 CC=mips64el-linux-gnuabi64-gcc-5 go install std
 fi
 
+if [ $GO_VERSION -ge 180 ]; then
+  echo "Bootstrapping linux/mips..."
+  GOOS=linux GOARCH=mips CGO_ENABLED=1 CC=mips-linux-gnu-gcc-5 go install std
+
+  echo "Bootstrapping linux/mipsle..."
+  GOOS=linux GOARCH=mipsle CGO_ENABLED=1 CC=mipsel-linux-gnu-gcc-5 go install std
+fi
+
 echo "Bootstrapping windows/amd64..."
 GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go install std
 

@@ -192,7 +192,7 @@ argument:
 The supported targets are:
 
  * Platforms: `android`, `darwin`, `ios`, `linux`, `windows`
- * Achitectures: `386`, `amd64`, `arm-5`, `arm-6`, `arm-7`, `arm64`
+ * Achitectures: `386`, `amd64`, `arm-5`, `arm-6`, `arm-7`, `arm64`, `mips`, `mipsle`, `mips64`, `mips64le`
 
 ### Platform versions
 
