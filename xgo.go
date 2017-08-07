@@ -53,6 +53,8 @@ var (
 	crossDeps   = flag.String("deps", "", "CGO dependencies (configure/make based archives)")
 	crossArgs   = flag.String("depsargs", "", "CGO dependency configure arguments")
 	targets     = flag.String("targets", "*/*", "Comma separated targets to build for")
+	privileged  = flag.Bool("privileged", false, "Flag for privileged container, by default, containers are unprivileged")
+	mountList   = flag.String("mounts", "", "User-defined mount directories, use ',' to separate. (host-path1:image-path1:ro,host-path2:image-path2:rw)")
 	dockerImage = flag.String("image", "", "Use custom docker image instead of official distribution")
 )
 
@@ -66,6 +68,8 @@ type ConfigFlags struct {
 	Dependencies string   // CGO dependencies (configure/make based archives)
 	Arguments    string   // CGO dependency configure arguments
 	Targets      []string // Targets to build for
+	Privileged   bool     // Flag for privileged container
+	MountList    []string // Mount directories
 }
 
 // Command line arguments to pass to go build
@@ -172,6 +176,8 @@ func main() {
 		Dependencies: *crossDeps,
 		Arguments:    *crossArgs,
 		Targets:      strings.Split(*targets, ","),
+		Privileged:   *privileged,
+		MountList:    strings.Split(*mountList, ","),
 	}
 	flags := &BuildFlags{
 		Verbose: *buildVerbose,
@@ -299,8 +305,14 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 		"-e", fmt.Sprintf("FLAG_BUILDMODE=%s", flags.Mode),
 		"-e", "TARGETS=" + strings.Replace(strings.Join(config.Targets, " "), "*", ".", -1),
 	}
+	if config.Privileged {
+		args = append(args, "--privileged=true")
+	}
 	for i := 0; i < len(locals); i++ {
 		args = append(args, []string{"-v", fmt.Sprintf("%s:%s:ro", locals[i], mounts[i])}...)
+	}
+	for i := 0; i < len(config.MountList); i++ {
+		args = append(args, []string{"-v", config.MountList[i]}...)
 	}
 	args = append(args, []string{"-e", "EXT_GOPATH=" + strings.Join(paths, ":")}...)
 
