@@ -3,6 +3,6 @@
 #
 # Released under the MIT license.
 
-FROM karalabe/xgo-1.8.0
+FROM karalabe/xgo-1.9.0
 
 MAINTAINER Péter Szilágyi <peterke@gmail.com>
