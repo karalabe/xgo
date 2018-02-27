@@ -1,5 +1,5 @@
-# Go cross compiler (xgo): Go 1.9.2
-# Copyright (c) 2017 Péter Szilágyi. All rights reserved.
+# Go cross compiler (xgo): Go 1.9.3
+# Copyright (c) 2018 Péter Szilágyi. All rights reserved.
 #
 # Released under the MIT license.
 
