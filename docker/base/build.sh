@@ -427,6 +427,31 @@ for TARGET in $TARGETS; do
       CC=mipsel-linux-gnu-gcc-5 CXX=mipsel-linux-gnu-g++-5 GOOS=linux GOARCH=mipsle CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" $BM -o "/build/$NAME-linux-mipsle`extension linux`" ./$PACK
     fi
   fi
+  if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "ppc64le" ]); then
+    if [ "$GO_VERSION" -lt 180 ]; then
+      echo "Go version too low, skipping linux/ppc64le..."
+    else
+      echo "Compiling for linux/ppc64le..."
+      CC=powerpc64le-linux-gnu-gcc-5 CXX=powerpc64le-linux-gnu-g++-5 HOST=powerpc64le-linux-gnu PREFIX=/usr/powerpc64le-linux-gnu $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      export PKG_CONFIG_PATH=/usr/powerpc64le-linux-gnu/lib/pkgconfig
+
+      CC=powerpc64le-linux-gnu-gcc-5 CXX=powerpc64le-linux-gnu-g++-5 GOOS=linux GOARCH=ppc64le CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
+      CC=powerpc64le-linux-gnu-gcc-5 CXX=powerpc64le-linux-gnu-g++-5 GOOS=linux GOARCH=ppc64le CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" $BM -o "/build/$NAME-linux-ppc64le`extension linux`" ./$PACK
+    fi
+  fi
+  if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "s390x" ]); then
+    if [ "$GO_VERSION" -lt 180 ]; then
+      echo "Go version too low, skipping linux/s390x..."
+    else
+      echo "Compiling for linux/s390x..."
+      CC=s390x-linux-gnu-gcc-5 CXX=s390x-linux-gnu-g++-5 HOST=s390x-linux-gnu PREFIX=/usr/s390x-linux-gnu $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      export PKG_CONFIG_PATH=/usr/s390x-linux-gnu/lib/pkgconfig
+
+      CC=s390x-linux-gnu-gcc-5 CXX=s390x-linux-gnu-g++-5 GOOS=linux GOARCH=s390x CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
+      CC=s390x-linux-gnu-gcc-5 CXX=s390x-linux-gnu-g++-5 GOOS=linux GOARCH=s390x CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" $BM -o "/build/$NAME-linux-s390x`extension linux`" ./$PACK
+    fi
+  fi
+
   # Check and build for Windows targets
   if [ $XGOOS == "." ] || [[ $XGOOS == windows* ]]; then
     # Split the platform version and configure the Windows NT version
