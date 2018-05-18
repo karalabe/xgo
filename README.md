@@ -154,7 +154,7 @@ original import path, use the `--remote` argument.
 
 If you used the above *branch* or *remote* selection machanisms, it may happen
 that the path you are trying to build is only present in the specific branch and
-not the default respoitory, causing Go to fail at locating it. To circumvent this,
+not the default repository, causing Go to fail at locating it. To circumvent this,
 you may specify only the repository root for xgo, and use an additional `--pkg`
 parameter to select the exact package within, honoring any prior *branch* and
 *remote* selections.
