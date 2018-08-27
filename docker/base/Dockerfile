@@ -3,7 +3,7 @@
 #
 # Released under the MIT license.
 
-FROM ubuntu:16.04
+FROM ubuntu:17.10
 
 MAINTAINER Péter Szilágyi <peterke@gmail.com>
 
@@ -26,16 +26,16 @@ RUN chmod +x $FETCH
 RUN \
   apt-get update && \
   apt-get install -y automake autogen build-essential ca-certificates                    \
-    gcc-5-arm-linux-gnueabi g++-5-arm-linux-gnueabi libc6-dev-armel-cross                \
-    gcc-5-arm-linux-gnueabihf g++-5-arm-linux-gnueabihf libc6-dev-armhf-cross            \
-    gcc-5-aarch64-linux-gnu g++-5-aarch64-linux-gnu libc6-dev-arm64-cross                \
-    gcc-5-mips-linux-gnu g++-5-mips-linux-gnu libc6-dev-mips-cross                       \
-    gcc-5-mipsel-linux-gnu g++-5-mipsel-linux-gnu libc6-dev-mipsel-cross                 \
-    gcc-5-mips64-linux-gnuabi64 g++-5-mips64-linux-gnuabi64 libc6-dev-mips64-cross       \
-    gcc-5-mips64el-linux-gnuabi64 g++-5-mips64el-linux-gnuabi64 libc6-dev-mips64el-cross \
-    gcc-5-multilib g++-5-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev             \
+    gcc-6-arm-linux-gnueabi g++-6-arm-linux-gnueabi libc6-dev-armel-cross                \
+    gcc-6-arm-linux-gnueabihf g++-6-arm-linux-gnueabihf libc6-dev-armhf-cross            \
+    gcc-6-aarch64-linux-gnu g++-6-aarch64-linux-gnu libc6-dev-arm64-cross                \
+    gcc-6-mips-linux-gnu g++-6-mips-linux-gnu libc6-dev-mips-cross                       \
+    gcc-6-mipsel-linux-gnu g++-6-mipsel-linux-gnu libc6-dev-mipsel-cross                 \
+    gcc-6-mips64-linux-gnuabi64 g++-6-mips64-linux-gnuabi64 libc6-dev-mips64-cross       \
+    gcc-6-mips64el-linux-gnuabi64 g++-6-mips64el-linux-gnuabi64 libc6-dev-mips64el-cross \
+    gcc-6-multilib gcc-7-multilib g++-6-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev \
     libtool libxml2-dev uuid-dev libssl-dev swig openjdk-8-jdk pkg-config patch          \
-    make xz-utils cpio wget zip unzip p7zip git mercurial bzr texinfo help2man           \
+    make xz-utils cpio wget zip unzip p7zip git mercurial bzr texinfo help2man         \
     --no-install-recommends
 
 # Fix any stock package issues
@@ -70,12 +70,12 @@ ADD update_ios.sh /update_ios.sh
 ENV UPDATE_IOS /update_ios.sh
 RUN chmod +x $UPDATE_IOS
 
-RUN \
-  IOS_SDK_PATH=https://sdks.website/dl/iPhoneOS9.3.sdk.tbz2     && \
-  $FETCH $IOS_SDK_PATH db5ecf91617abf26d3db99e769bd655b943905e5 && \
-  mv `basename $IOS_SDK_PATH` iPhoneOS9.3.sdk.tar.bz2           && \
-  $UPDATE_IOS /iPhoneOS9.3.sdk.tar.bz2                          && \
-  rm -rf /iPhoneOS9.3.sdk.tar.bz2
+#RUN \
+#  IOS_SDK_PATH=https://sdks.website/dl/iPhoneOS9.3.sdk.tbz2     && \
+#  $FETCH $IOS_SDK_PATH db5ecf91617abf26d3db99e769bd655b943905e5 && \
+#  mv `basename $IOS_SDK_PATH` iPhoneOS9.3.sdk.tar.bz2           && \
+#  $UPDATE_IOS /iPhoneOS9.3.sdk.tar.bz2                          && \
+#  rm -rf /iPhoneOS9.3.sdk.tar.bz2
 
 # Configure the container for Android cross compilation
 ENV ANDROID_NDK         android-ndk-r11c
