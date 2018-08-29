@@ -76,7 +76,10 @@ RUN \
   $FETCH $IOS_SDK_PATH 7745815cd13d9b44c4cb0a2a40715e5410330233300ce4ff0ce106da17a636e8 && \
   mv `basename $IOS_SDK_PATH` iPhoneOS10.3.sdk.tmp.zip           && \
   $UPDATE_IOS /iPhoneOS10.3.sdk.tmp.zip                          && \
-  rm -rf /iPhoneOS10.3.sdk.tmp.zip
+  rm -rf /iPhoneOS10.3.sdk.tmp.zip  && \
+  cp -r /usr/local/osx-ndk-x86/SDK/MacOSX10.11.sdk/usr/include/c++/v1 /usr/local/ios-ndk-arm64/SDK/iPhoneOS10.3.sdk/usr/include/c++
+
+ENV PATH $IOS_NDK_ARM64/bin:$PATH
 
 # Configure the container for Android cross compilation
 ENV ANDROID_NDK         android-ndk-r11c
