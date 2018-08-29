@@ -35,7 +35,7 @@ RUN \
     gcc-6-mips64el-linux-gnuabi64 g++-6-mips64el-linux-gnuabi64 libc6-dev-mips64el-cross \
     gcc-6-multilib gcc-7-multilib g++-6-multilib gcc-mingw-w64 g++-mingw-w64 clang llvm-dev \
     libtool libxml2-dev uuid-dev libssl-dev swig openjdk-8-jdk pkg-config patch          \
-    make xz-utils cpio wget zip unzip p7zip git mercurial bzr texinfo help2man         \
+    make xz-utils cpio wget zip unzip p7zip git mercurial bzr texinfo help2man cmake     \
     --no-install-recommends
 
 # Fix any stock package issues
@@ -70,12 +70,13 @@ ADD update_ios.sh /update_ios.sh
 ENV UPDATE_IOS /update_ios.sh
 RUN chmod +x $UPDATE_IOS
 
-#RUN \
-#  IOS_SDK_PATH=https://sdks.website/dl/iPhoneOS9.3.sdk.tbz2     && \
-#  $FETCH $IOS_SDK_PATH db5ecf91617abf26d3db99e769bd655b943905e5 && \
-#  mv `basename $IOS_SDK_PATH` iPhoneOS9.3.sdk.tar.bz2           && \
-#  $UPDATE_IOS /iPhoneOS9.3.sdk.tar.bz2                          && \
-#  rm -rf /iPhoneOS9.3.sdk.tar.bz2
+RUN \
+  IOS_SDK_FILE=iPhoneOS10.3.sdk.zip && \
+  IOS_SDK_PATH=http://resources.airnativeextensions.com/ios/$IOS_SDK_FILE         && \
+  $FETCH $IOS_SDK_PATH 7745815cd13d9b44c4cb0a2a40715e5410330233300ce4ff0ce106da17a636e8 && \
+  mv `basename $IOS_SDK_PATH` iPhoneOS10.3.sdk.tmp.zip           && \
+  $UPDATE_IOS /iPhoneOS10.3.sdk.tmp.zip                          && \
+  rm -rf /iPhoneOS10.3.sdk.tmp.zip
 
 # Configure the container for Android cross compilation
 ENV ANDROID_NDK         android-ndk-r11c

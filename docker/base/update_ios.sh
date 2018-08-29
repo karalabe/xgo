@@ -24,6 +24,9 @@ function extract {
     *.tar.bz2)
       bzip2 -dc $1 | tar xf -
       ;;
+    *.zip)
+      unzip $1
+      ;;
   esac
 }
 
@@ -52,8 +55,6 @@ if [[ "`basename $1`" =~ ^iPhoneSimulator ]]; then
   mv /cctools-port/usage_examples/ios_toolchain/target $IOS_SIM_NDK_AMD64
 else
   rm -rf $IOS_NDK_ARM_7 $IOS_NDK_ARM64
-  /cctools-port/usage_examples/ios_toolchain/build.sh /tmp/$sdk.tar.gz armv7
-  mv /cctools-port/usage_examples/ios_toolchain/target $IOS_NDK_ARM_7
   /cctools-port/usage_examples/ios_toolchain/build.sh /tmp/$sdk.tar.gz arm64
   mv /cctools-port/usage_examples/ios_toolchain/target $IOS_NDK_ARM64
 fi
