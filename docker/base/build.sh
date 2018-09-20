@@ -115,11 +115,11 @@ else
 fi
 
 # Download all the C dependencies
-mkdir /deps
+mkdir /tmp/deps
 DEPS=($DEPS) && for dep in "${DEPS[@]}"; do
-  if [ "${dep##*.}" == "tar" ]; then cat "/deps-cache/`basename $dep`" | tar -C /deps -x; fi
-  if [ "${dep##*.}" == "gz" ];  then cat "/deps-cache/`basename $dep`" | tar -C /deps -xz; fi
-  if [ "${dep##*.}" == "bz2" ]; then cat "/deps-cache/`basename $dep`" | tar -C /deps -xj; fi
+  if [ "${dep##*.}" == "tar" ]; then cat "/deps-cache/`basename $dep`" | tar -C /tmp/deps -x; fi
+  if [ "${dep##*.}" == "gz" ];  then cat "/deps-cache/`basename $dep`" | tar -C /tmp/deps -xz; fi
+  if [ "${dep##*.}" == "bz2" ]; then cat "/deps-cache/`basename $dep`" | tar -C /tmp/deps -xj; fi
 done
 
 DEPS_ARGS=($ARGS)
@@ -166,7 +166,7 @@ for TARGET in $TARGETS; do
     else
       unset CGO_CCPIE CGO_LDPIE EXT_LDPIE
     fi
-    mkdir -p /build-android-aar
+    mkdir -p /tmp/build-android-aar
 
     # Iterate over the requested architectures, bootstrap and build
     if [ $XGOARCH == "." ] || [ $XGOARCH == "arm" ] || [ $XGOARCH == "aar" ]; then
@@ -185,7 +185,7 @@ for TARGET in $TARGETS; do
         CC=arm-linux-androideabi-gcc GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go install std
 
         echo "Compiling for android-$PLATFORM/arm..."
-        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ HOST=arm-linux-androideabi PREFIX=/usr/$ANDROID_CHAIN_ARM/arm-linux-androideabi $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+        CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ HOST=arm-linux-androideabi PREFIX=/usr/$ANDROID_CHAIN_ARM/arm-linux-androideabi $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
         export PKG_CONFIG_PATH=/usr/$ANDROID_CHAIN_ARM/arm-linux-androideabi/lib/pkgconfig
 
         if [ $XGOARCH == "." ] || [ $XGOARCH == "arm" ]; then
@@ -194,7 +194,7 @@ for TARGET in $TARGETS; do
         fi
         if [ $XGOARCH == "." ] || [ $XGOARCH == "aar" ]; then
           CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
-          CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $EXT_LDAMD $LD" --buildmode=c-shared -o "/build-android-aar/$NAME-android-$PLATFORM-arm.so" ./$PACK
+          CC=arm-linux-androideabi-gcc CXX=arm-linux-androideabi-g++ GOOS=android GOARCH=arm GOARM=7 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $EXT_LDAMD $LD" --buildmode=c-shared -o "/tmp/build-android-aar/$NAME-android-$PLATFORM-arm.so" ./$PACK
         fi
       fi
     fi
@@ -209,7 +209,7 @@ for TARGET in $TARGETS; do
         CC=i686-linux-android-gcc GOOS=android GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go install std
 
         echo "Compiling for android-$PLATFORM/386..."
-        CC=i686-linux-android-gcc CXX=i686-linux-android-g++ HOST=i686-linux-android PREFIX=/usr/$ANDROID_CHAIN_386/i686-linux-android $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+        CC=i686-linux-android-gcc CXX=i686-linux-android-g++ HOST=i686-linux-android PREFIX=/usr/$ANDROID_CHAIN_386/i686-linux-android $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
         export PKG_CONFIG_PATH=/usr/$ANDROID_CHAIN_386/i686-linux-android/lib/pkgconfig
 
         if [ $XGOARCH == "." ] || [ $XGOARCH == "386" ]; then
@@ -218,7 +218,7 @@ for TARGET in $TARGETS; do
         fi
         if [ $XGOARCH == "." ] || [ $XGOARCH == "aar" ]; then
           CC=i686-linux-android-gcc CXX=i686-linux-android-g++ GOOS=android GOARCH=386 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
-          CC=i686-linux-android-gcc CXX=i686-linux-android-g++ GOOS=android GOARCH=386 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" --buildmode=c-shared -o "/build-android-aar/$NAME-android-$PLATFORM-386.so" ./$PACK
+          CC=i686-linux-android-gcc CXX=i686-linux-android-g++ GOOS=android GOARCH=386 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" --buildmode=c-shared -o "/tmp/build-android-aar/$NAME-android-$PLATFORM-386.so" ./$PACK
         fi
       fi
       if [ "$PLATFORM" -ge 21 ] && ([ $XGOARCH == "." ] || [ $XGOARCH == "arm64" ] || [ $XGOARCH == "aar" ]); then
@@ -229,7 +229,7 @@ for TARGET in $TARGETS; do
         CC=aarch64-linux-android-gcc GOOS=android GOARCH=arm64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_CCPIE" CGO_LDFLAGS="$CGO_LDPIE" go install std
 
         echo "Compiling for android-$PLATFORM/arm64..."
-        CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ HOST=aarch64-linux-android PREFIX=/usr/$ANDROID_CHAIN_ARM64/aarch64-linux-android $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+        CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ HOST=aarch64-linux-android PREFIX=/usr/$ANDROID_CHAIN_ARM64/aarch64-linux-android $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
         export PKG_CONFIG_PATH=/usr/$ANDROID_CHAIN_ARM64/aarch64-linux-android/lib/pkgconfig
 
         if [ $XGOARCH == "." ] || [ $XGOARCH == "arm64" ]; then
@@ -238,7 +238,7 @@ for TARGET in $TARGETS; do
         fi
         if [ $XGOARCH == "." ] || [ $XGOARCH == "aar" ]; then
           CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ GOOS=android GOARCH=arm64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
-          CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ GOOS=android GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" --buildmode=c-shared -o "/build-android-aar/$NAME-android-$PLATFORM-arm64.so" ./$PACK
+          CC=aarch64-linux-android-gcc CXX=aarch64-linux-android-g++ GOOS=android GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" --buildmode=c-shared -o "/tmp/build-android-aar/$NAME-android-$PLATFORM-arm64.so" ./$PACK
         fi
       fi
     fi
@@ -263,7 +263,7 @@ for TARGET in $TARGETS; do
 
       # Generate the JNI wrappers automatically with SWIG
       jni=`mktemp -d`
-      header=`find /build-android-aar | grep '\.h$' | head -n 1`
+      header=`find /tmp/build-android-aar | grep '\.h$' | head -n 1`
       if [ "$header" == "" ]; then
         echo "No API C header specified, skipping android-$PLATFORM/aar..."
       else
@@ -276,7 +276,7 @@ for TARGET in $TARGETS; do
         swig -java -package $package -outdir $jni/${package//.//} $jni/$NAME.i
 
         # Assemble the Go static libraries and the JNI interface into shared libraries
-        for lib in `find /build-android-aar | grep '\.so$'`; do
+        for lib in `find /tmp/build-android-aar | grep '\.so$'`; do
           if [[ "$lib" = *-arm.so ]];   then cc=arm-linux-androideabi-gcc; abi="armeabi-v7a"; fi
           if [[ "$lib" = *-arm64.so ]]; then cc=aarch64-linux-android-gcc; abi="arm64-v8a"; fi
           if [[ "$lib" = *-386.so ]];   then cc=i686-linux-android-gcc;    abi="x86"; fi
@@ -298,20 +298,20 @@ for TARGET in $TARGETS; do
       fi
     fi
     # Clean up the android builds, toolchains and runtimes
-    rm -rf /build-android-aar
+    rm -rf /tmp/build-android-aar
     rm -rf /usr/local/go/pkg/android_*
     rm -rf /usr/$ANDROID_CHAIN_ARM /usr/$ANDROID_CHAIN_ARM64 /usr/$ANDROID_CHAIN_386
   fi
   # Check and build for Linux targets
   if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]); then
     echo "Compiling for linux/amd64..."
-    HOST=x86_64-linux PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+    HOST=x86_64-linux PREFIX=/usr/local $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
     GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
     GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" $R $BM -o "/build/$NAME-linux-amd64$R`extension linux`" ./$PACK
   fi
   if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "386" ]); then
     echo "Compiling for linux/386..."
-    HOST=i686-linux PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+    HOST=i686-linux PREFIX=/usr/local $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
     GOOS=linux GOARCH=386 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
     GOOS=linux GOARCH=386 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$V $LD" $BM -o "/build/$NAME-linux-386`extension linux`" ./$PACK
   fi
@@ -321,7 +321,7 @@ for TARGET in $TARGETS; do
       CC=arm-linux-gnueabi-gcc-5 GOOS=linux GOARCH=arm GOARM=5 CGO_ENABLED=1 CGO_CFLAGS="-march=armv5" CGO_CXXFLAGS="-march=armv5" go install std
     fi
     echo "Compiling for linux/arm-5..."
-    CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 HOST=arm-linux-gnueabi PREFIX=/usr/arm-linux-gnueabi CFLAGS="-march=armv5" CXXFLAGS="-march=armv5" $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+    CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 HOST=arm-linux-gnueabi PREFIX=/usr/arm-linux-gnueabi CFLAGS="-march=armv5" CXXFLAGS="-march=armv5" $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
     export PKG_CONFIG_PATH=/usr/arm-linux-gnueabi/lib/pkgconfig
 
     CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 GOOS=linux GOARCH=arm GOARM=5 CGO_ENABLED=1 CGO_CFLAGS="-march=armv5" CGO_CXXFLAGS="-march=armv5" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
@@ -339,7 +339,7 @@ for TARGET in $TARGETS; do
       CC=arm-linux-gnueabi-gcc-5 GOOS=linux GOARCH=arm GOARM=6 CGO_ENABLED=1 CGO_CFLAGS="-march=armv6" CGO_CXXFLAGS="-march=armv6" go install std
 
       echo "Compiling for linux/arm-6..."
-      CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 HOST=arm-linux-gnueabi PREFIX=/usr/arm-linux-gnueabi CFLAGS="-march=armv6" CXXFLAGS="-march=armv6" $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 HOST=arm-linux-gnueabi PREFIX=/usr/arm-linux-gnueabi CFLAGS="-march=armv6" CXXFLAGS="-march=armv6" $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
       export PKG_CONFIG_PATH=/usr/arm-linux-gnueabi/lib/pkgconfig
 
       CC=arm-linux-gnueabi-gcc-5 CXX=arm-linux-gnueabi-g++-5 GOOS=linux GOARCH=arm GOARM=6 CGO_ENABLED=1 CGO_CFLAGS="-march=armv6" CGO_CXXFLAGS="-march=armv6" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
@@ -357,7 +357,7 @@ for TARGET in $TARGETS; do
       CC=arm-linux-gnueabihf-gcc-5 GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="-march=armv7-a" CGO_CXXFLAGS="-march=armv7-a" go install std
 
       echo "Compiling for linux/arm-7..."
-      CC=arm-linux-gnueabihf-gcc-5 CXX=arm-linux-gnueabihf-g++-5 HOST=arm-linux-gnueabihf PREFIX=/usr/arm-linux-gnueabihf CFLAGS="-march=armv7-a -fPIC" CXXFLAGS="-march=armv7-a -fPIC" $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=arm-linux-gnueabihf-gcc-5 CXX=arm-linux-gnueabihf-g++-5 HOST=arm-linux-gnueabihf PREFIX=/usr/arm-linux-gnueabihf CFLAGS="-march=armv7-a -fPIC" CXXFLAGS="-march=armv7-a -fPIC" $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
       export PKG_CONFIG_PATH=/usr/arm-linux-gnueabihf/lib/pkgconfig
 
       CC=arm-linux-gnueabihf-gcc-5 CXX=arm-linux-gnueabihf-g++-5 GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS="-march=armv7-a -fPIC" CGO_CXXFLAGS="-march=armv7-a -fPIC" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
@@ -372,7 +372,7 @@ for TARGET in $TARGETS; do
       echo "Go version too low, skipping linux/arm64..."
     else
       echo "Compiling for linux/arm64..."
-      CC=aarch64-linux-gnu-gcc-5 CXX=aarch64-linux-gnu-g++-5 HOST=aarch64-linux-gnu PREFIX=/usr/aarch64-linux-gnu $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=aarch64-linux-gnu-gcc-5 CXX=aarch64-linux-gnu-g++-5 HOST=aarch64-linux-gnu PREFIX=/usr/aarch64-linux-gnu $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
       export PKG_CONFIG_PATH=/usr/aarch64-linux-gnu/lib/pkgconfig
 
       CC=aarch64-linux-gnu-gcc-5 CXX=aarch64-linux-gnu-g++-5 GOOS=linux GOARCH=arm64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
@@ -384,7 +384,7 @@ for TARGET in $TARGETS; do
       echo "Go version too low, skipping linux/mips64..."
     else
       echo "Compiling for linux/mips64..."
-      CC=mips64-linux-gnuabi64-gcc-5 CXX=mips64-linux-gnuabi64-g++-5 HOST=mips64-linux-gnuabi64 PREFIX=/usr/mips64-linux-gnuabi64 $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=mips64-linux-gnuabi64-gcc-5 CXX=mips64-linux-gnuabi64-g++-5 HOST=mips64-linux-gnuabi64 PREFIX=/usr/mips64-linux-gnuabi64 $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
       export PKG_CONFIG_PATH=/usr/mips64-linux-gnuabi64/lib/pkgconfig
 
       CC=mips64-linux-gnuabi64-gcc-5 CXX=mips64-linux-gnuabi64-g++-5 GOOS=linux GOARCH=mips64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
@@ -396,7 +396,7 @@ for TARGET in $TARGETS; do
       echo "Go version too low, skipping linux/mips64le..."
     else
       echo "Compiling for linux/mips64le..."
-      CC=mips64el-linux-gnuabi64-gcc-5 CXX=mips64el-linux-gnuabi64-g++-5 HOST=mips64el-linux-gnuabi64 PREFIX=/usr/mips64el-linux-gnuabi64 $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=mips64el-linux-gnuabi64-gcc-5 CXX=mips64el-linux-gnuabi64-g++-5 HOST=mips64el-linux-gnuabi64 PREFIX=/usr/mips64el-linux-gnuabi64 $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
       export PKG_CONFIG_PATH=/usr/mips64le-linux-gnuabi64/lib/pkgconfig
 
       CC=mips64el-linux-gnuabi64-gcc-5 CXX=mips64el-linux-gnuabi64-g++-5 GOOS=linux GOARCH=mips64le CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
@@ -408,7 +408,7 @@ for TARGET in $TARGETS; do
       echo "Go version too low, skipping linux/mips..."
     else
       echo "Compiling for linux/mips..."
-      CC=mips-linux-gnu-gcc-5 CXX=mips-linux-gnu-g++-5 HOST=mips-linux-gnu PREFIX=/usr/mips-linux-gnu $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=mips-linux-gnu-gcc-5 CXX=mips-linux-gnu-g++-5 HOST=mips-linux-gnu PREFIX=/usr/mips-linux-gnu $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
       export PKG_CONFIG_PATH=/usr/mips-linux-gnu/lib/pkgconfig
 
       CC=mips-linux-gnu-gcc-5 CXX=mips-linux-gnu-g++-5 GOOS=linux GOARCH=mips CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
@@ -420,7 +420,7 @@ for TARGET in $TARGETS; do
       echo "Go version too low, skipping linux/mipsle..."
     else
       echo "Compiling for linux/mipsle..."
-      CC=mipsel-linux-gnu-gcc-5 CXX=mipsel-linux-gnu-g++-5 HOST=mipsel-linux-gnu PREFIX=/usr/mipsel-linux-gnu $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=mipsel-linux-gnu-gcc-5 CXX=mipsel-linux-gnu-g++-5 HOST=mipsel-linux-gnu PREFIX=/usr/mipsel-linux-gnu $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
       export PKG_CONFIG_PATH=/usr/mipsle-linux-gnu/lib/pkgconfig
 
       CC=mipsel-linux-gnu-gcc-5 CXX=mipsel-linux-gnu-g++-5 GOOS=linux GOARCH=mipsle CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
@@ -444,7 +444,7 @@ for TARGET in $TARGETS; do
     # Build the requested windows binaries
     if [ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]; then
       echo "Compiling for windows-$PLATFORM/amd64..."
-      CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix HOST=x86_64-w64-mingw32 PREFIX=/usr/x86_64-w64-mingw32 $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix HOST=x86_64-w64-mingw32 PREFIX=/usr/x86_64-w64-mingw32 $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
       export PKG_CONFIG_PATH=/usr/x86_64-w64-mingw32/lib/pkgconfig
 
       CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
@@ -452,7 +452,7 @@ for TARGET in $TARGETS; do
     fi
     if [ $XGOARCH == "." ] || [ $XGOARCH == "386" ]; then
       echo "Compiling for windows-$PLATFORM/386..."
-      CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix HOST=i686-w64-mingw32 PREFIX=/usr/i686-w64-mingw32 $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix HOST=i686-w64-mingw32 PREFIX=/usr/i686-w64-mingw32 $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
       export PKG_CONFIG_PATH=/usr/i686-w64-mingw32/lib/pkgconfig
 
       CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix GOOS=windows GOARCH=386 CGO_ENABLED=1 CGO_CFLAGS="$CGO_NTDEF" CGO_CXXFLAGS="$CGO_NTDEF" go get $V $X "${T[@]}" --ldflags="$V $LD" -d ./$PACK
@@ -476,13 +476,13 @@ for TARGET in $TARGETS; do
     # Build the requested darwin binaries
     if [ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]; then
       echo "Compiling for darwin-$PLATFORM/amd64..."
-      CC=o64-clang CXX=o64-clang++ HOST=x86_64-apple-darwin15 PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=o64-clang CXX=o64-clang++ HOST=x86_64-apple-darwin15 PREFIX=/usr/local $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
       CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" -d ./$PACK
       CC=o64-clang CXX=o64-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" $R $BM -o "/build/$NAME-darwin-$PLATFORM-amd64$R`extension darwin`" ./$PACK
     fi
     if [ $XGOARCH == "." ] || [ $XGOARCH == "386" ]; then
       echo "Compiling for darwin-$PLATFORM/386..."
-      CC=o32-clang CXX=o32-clang++ HOST=i386-apple-darwin15 PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+      CC=o32-clang CXX=o32-clang++ HOST=i386-apple-darwin15 PREFIX=/usr/local $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
       CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go get $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" -d ./$PACK
       CC=o32-clang CXX=o32-clang++ GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build $V $X "${T[@]}" --ldflags="$LDSTRIP $V $LD" $BM -o "/build/$NAME-darwin-$PLATFORM-386`extension darwin`" ./$PACK
     fi
@@ -508,7 +508,7 @@ for TARGET in $TARGETS; do
       else
         IOSTAGS=(--tags ios)
       fi
-      mkdir -p /build-ios-fw
+      mkdir -p /tmp/build-ios-fw
 
       # Strip symbol table below Go 1.6 to prevent DWARF issues
       LDSTRIP=""
@@ -522,13 +522,13 @@ for TARGET in $TARGETS; do
         GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-apple-darwin11-clang go install --tags ios std
 
         echo "Compiling for ios-$PLATFORM/arm-7..."
-        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ HOST=arm-apple-darwin11 PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ HOST=arm-apple-darwin11 PREFIX=/usr/local $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
         CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 go get $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" -d ./$PACK
         if [ $XGOARCH == "." ] || [ $XGOARCH == "arm-7" ]; then
           CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$LDSTRIP $V $LD" $BM -o "/build/$NAME-ios-$PLATFORM-armv7`extension darwin`" ./$PACK
         fi
         if [ $XGOARCH == "." ] || [ $XGOARCH == "framework" ]; then
-          CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" --buildmode=c-archive -o "/build-ios-fw/$NAME-ios-$PLATFORM-armv7.a" ./$PACK
+          CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm GOARM=7 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" --buildmode=c-archive -o "/tmp/build-ios-fw/$NAME-ios-$PLATFORM-armv7.a" ./$PACK
         fi
         echo "Cleaning up Go runtime for ios-$PLATFORM/arm-7..."
         rm -rf /usr/local/go/pkg/darwin_arm
@@ -539,13 +539,13 @@ for TARGET in $TARGETS; do
         GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 CC=arm-apple-darwin11-clang go install --tags ios std
 
         echo "Compiling for ios-$PLATFORM/arm64..."
-        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ HOST=arm-apple-darwin11 PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ HOST=arm-apple-darwin11 PREFIX=/usr/local $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
         CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go get $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" -d ./$PACK
         if [ $XGOARCH == "." ] || [ $XGOARCH == "arm64" ]; then
           CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$LDSTRIP $V $LD" $BM -o "/build/$NAME-ios-$PLATFORM-arm64`extension darwin`" ./$PACK
         fi
         if [ $XGOARCH == "." ] || [ $XGOARCH == "framework" ]; then
-          CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" --buildmode=c-archive -o "/build-ios-fw/$NAME-ios-$PLATFORM-arm64.a" ./$PACK
+          CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" --buildmode=c-archive -o "/tmp/build-ios-fw/$NAME-ios-$PLATFORM-arm64.a" ./$PACK
         fi
         echo "Cleaning up Go runtime for ios-$PLATFORM/arm64..."
         rm -rf /usr/local/go/pkg/darwin_arm64
@@ -557,13 +557,13 @@ for TARGET in $TARGETS; do
         GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 CC=arm-apple-darwin11-clang go install --tags ios std
 
         echo "Compiling for ios-$PLATFORM/amd64..."
-        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ HOST=arm-apple-darwin11 PREFIX=/usr/local $BUILD_DEPS /deps ${DEPS_ARGS[@]}
+        CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ HOST=arm-apple-darwin11 PREFIX=/usr/local $BUILD_DEPS /tmp/deps ${DEPS_ARGS[@]}
         CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go get $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" -d ./$PACK
         if [ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]; then
           CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$LDSTRIP $V $LD" $BM -o "/build/$NAME-ios-$PLATFORM-x86_64`extension darwin`" ./$PACK
         fi
         if [ $XGOARCH == "." ] || [ $XGOARCH == "framework" ]; then
-          CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" --buildmode=c-archive -o "/build-ios-fw/$NAME-ios-$PLATFORM-x86_64.a" ./$PACK
+          CC=arm-apple-darwin11-clang CXX=arm-apple-darwin11-clang++ GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build $V $X "${IOSTAGS[@]}" --ldflags="$V $LD" --buildmode=c-archive -o "/tmp/build-ios-fw/$NAME-ios-$PLATFORM-x86_64.a" ./$PACK
         fi
         echo "Cleaning up Go runtime for ios-$PLATFORM/amd64..."
         rm -rf /usr/local/go/pkg/darwin_amd64
@@ -579,16 +579,16 @@ for TARGET in $TARGETS; do
         (cd $framework/Versions && ln -nsf A Current)
 
         arches=()
-        for lib in `ls /build-ios-fw | grep -e '\.a$'`; do
-          arches+=("-arch" "`echo ${lib##*-} | cut -d '.' -f 1`" "/build-ios-fw/$lib")
+        for lib in `ls /tmp/build-ios-fw | grep -e '\.a$'`; do
+          arches+=("-arch" "`echo ${lib##*-} | cut -d '.' -f 1`" "/tmp/build-ios-fw/$lib")
         done
         arm-apple-darwin11-lipo -create "${arches[@]}" -o $framework/Versions/A/$title
         arm-apple-darwin11-ranlib $framework/Versions/A/$title
         (cd $framework && ln -nsf Versions/A/$title $title)
 
         mkdir -p $framework/Versions/A/Headers
-        for header in `ls /build-ios-fw | grep -e '\.h$'`; do
-          cp -f /build-ios-fw/$header $framework/Versions/A/Headers/$title.h
+        for header in `ls /tmp/build-ios-fw | grep -e '\.h$'`; do
+          cp -f /tmp/build-ios-fw/$header $framework/Versions/A/Headers/$title.h
         done
         (cd $framework && ln -nsf Versions/A/Headers Headers)
 
@@ -602,7 +602,7 @@ for TARGET in $TARGETS; do
 
         chmod 777 -R /build/$NAME-ios-$PLATFORM-framework
       fi
-      rm -rf /build-ios-fw
+      rm -rf /tmp/build-ios-fw
     fi
     # Remove any automatically injected deployment target vars
     unset IPHONEOS_DEPLOYMENT_TARGET
@@ -611,7 +611,7 @@ done
 
 # Clean up any leftovers for subsequent build invocations
 echo "Cleaning up build environment..."
-rm -rf /deps
+rm -rf /tmp/deps
 
 for dir in `ls /usr/local`; do
   keep=0
