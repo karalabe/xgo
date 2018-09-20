@@ -299,6 +299,12 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 		"-e", fmt.Sprintf("FLAG_BUILDMODE=%s", flags.Mode),
 		"-e", "TARGETS=" + strings.Replace(strings.Join(config.Targets, " "), "*", ".", -1),
 	}
+	user, err := user.Current()
+	if err == nil {
+		args = append(args,
+			"-e", fmt.Sprintf("UID=%s", user.Uid),
+			"-e", fmt.Sprintf("GID=%s", user.Gid))
+	}
 	for i := 0; i < len(locals); i++ {
 		args = append(args, []string{"-v", fmt.Sprintf("%s:%s:ro", locals[i], mounts[i])}...)
 	}
