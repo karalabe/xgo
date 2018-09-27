@@ -80,6 +80,7 @@ RUN \
   cp -r /usr/local/osx-ndk-x86/SDK/MacOSX10.11.sdk/usr/include/c++/v1 /usr/local/ios-ndk-arm64/SDK/iPhoneOS10.3.sdk/usr/include/c++
 
 ENV PATH $IOS_NDK_ARM64/bin:$PATH
+ENV LD_LIBRARY_PATH $IOS_NDK_ARM64/lib/:$LD_LIBRARY_PATH
 
 # Configure the container for Android cross compilation
 ENV ANDROID_NDK         android-ndk-r11c

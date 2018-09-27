@@ -3,12 +3,13 @@
 #
 # Released under the MIT license.
 
-FROM karalabe/xgo-base
+FROM mysteriumnetwork/xgo:base
 
 MAINTAINER Péter Szilágyi <peterke@gmail.com>
 
 # Configure the root Go distribution and bootstrap based on it
 ENV GO_VERSION 1110
+ENV CGO_LDFLAGS_ALLOW -fobjc-arc
 
 RUN \
   export ROOT_DIST=https://storage.googleapis.com/golang/go1.11.linux-amd64.tar.gz      && \
