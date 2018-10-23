@@ -1,0 +1,54 @@
+#!/bin/bash
+set -e
+
+function showSDK {
+    echo "$IOS_NDK_ARM64/SDK/iPhoneOS10.3.sdk"
+}
+
+function findTool {
+    echo "$IOS_NDK_ARM64/bin/arm-apple-darwin11-$1"
+}
+
+function runTool {
+    local cmd=$1
+    shift
+    local tool=$(findTool $cmd)
+    $tool $@
+    exit $?
+}
+
+#parse args and do stuff
+while [[ $# -gt 0 ]]
+do
+key="$1"
+shift
+case $key in
+    --sdk)
+    sdkType="$2"
+    shift
+    ;;
+    --find)
+    toolToFind="$1"
+    findTool "$toolToFind"
+    shift
+    exit 0
+    ;;
+    --show-sdk-path)
+        showSDK
+        exit 0
+    ;;
+    xcodebuild)
+    echo "xcrun wrapper v0.1"
+    exit 0
+    ;;
+    --run)
+    cmd=$1
+    shift
+    runTool "$cmd" $@
+    ;;
+    *)
+    runTool "$key" $@
+    ;;
+esac
+done
+exit 0
