@@ -120,14 +120,14 @@ ENV PATH /usr/$ANDROID_CHAIN_AMD64/bin:$PATH
 
 # setup Android SDK tooling too
 ENV ANDROID_SDK_PATH https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
+ENV ANDROID_HOME /usr/local/android-sdk
+
 RUN \
     $FETCH $ANDROID_SDK_PATH 92ffee5a1d98d856634e8b71132e8a95d96c83a63fde1099be3d86df3106def9 && \
     unzip `basename $ANDROID_SDK_PATH` \
-        -d /usr/local/android-sdk > /dev/null && \
-     rm -f `basename $ANDROID_SDK_PATH`
-ENV ANDROID_HOME /usr/local/android-sdk
-#Fetch android versions required by go mobile (defined in ndk archs) (386 and arm requires android-16, arm64 requires android 21)
-RUN echo "Y" | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-21" "platforms;android-16"
+        -d $ANDROID_HOME > /dev/null && \
+    rm -f `basename $ANDROID_SDK_PATH` && \
+    echo "Y" | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-21" "platforms;android-16"
 
 # Inject the old Go package downloader and tool-chain bootstrapper
 ADD bootstrap.sh /bootstrap.sh
@@ -153,5 +153,13 @@ RUN chmod +x $BUILD_DEPS
 ADD build.sh /build.sh
 ENV BUILD /build.sh
 RUN chmod +x $BUILD
+
+# Setup gomobile helper script (note: gomobile itself will be fetched later with go)
+ADD hacks /hacks
+RUN chmod -R +x /hacks/*
+
+ADD gomobile.sh /gomobile.sh
+ENV GOMOBILE /gomobile.sh
+RUN chmod +x $GOMOBILE
 
 ENTRYPOINT ["/build.sh"]
