@@ -154,8 +154,8 @@ for TARGET in $TARGETS; do
 
   # Check and build for Android targets
   if ([ $XGOOS == "." ] || [[ $XGOOS == android* ]]); then
-    #ignore architectures, android versions etc. build only archive and sources
-    #android api will be 21
+    # Ignore architectures, android versions etc. build only archive and sources
+    # Android api will be 21
     $GOMOBILE bind --target=android/arm64 $X $V "${T[@]}" -o "/build/$NAME.aar" ./$PACK
   fi
   # Check and build for Linux targets
@@ -347,7 +347,7 @@ for TARGET in $TARGETS; do
   fi
   # Check and build for iOS targets
   if [ $XGOOS == "." ] || [[ $XGOOS == ios* ]]; then
-      # Split the platform version and configure the deployment target
+    # Split the platform version and configure the deployment target
     PLATFORM=`echo $XGOOS | cut -d '-' -f 2`
     if [ "$PLATFORM" == "" ] || [ "$PLATFORM" == "." ] || [ "$PLATFORM" == "ios" ]; then
       PLATFORM=10.3 #min ios version to build for

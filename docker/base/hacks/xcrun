@@ -30,12 +30,11 @@ case $key in
     --find)
     toolToFind="$1"
     findTool "$toolToFind"
-    shift
     exit 0
     ;;
     --show-sdk-path)
-        showSDK
-        exit 0
+    showSDK
+    exit 0
     ;;
     xcodebuild)
     echo "xcrun wrapper v0.1"
@@ -51,4 +50,3 @@ case $key in
     ;;
 esac
 done
-exit 0
