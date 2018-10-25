@@ -68,6 +68,6 @@ ln -s /go/bin/xgo /usr/bin/xgo
 
 # Install gomobile tool for android/ios frameworks
 echo "Installing gomobile..."
-go get -u golang.org/x/mobile/cmd/gomobile
+/hacks/getGomobileFork.sh
 /go/bin/gomobile init -ndk /usr/local/android-ndk-r13b/
 /go/bin/gomobile version
