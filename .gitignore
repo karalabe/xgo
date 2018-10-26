@@ -1,1 +1,4 @@
 .idea/
+artifacts/
+bin/
+pkg/

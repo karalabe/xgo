@@ -1,0 +1,13 @@
+diff --git a/cctools/autogen.sh b/cctools/autogen.sh
+index 9258d0d..ca899f5 100755
+--- a/cctools/autogen.sh
++++ b/cctools/autogen.sh
+@@ -19,7 +19,7 @@ fi
+ export LIBTOOLIZE
+ mkdir -p m4
+ 
+-$LIBTOOLIZE -c -i
++$LIBTOOLIZE -c -i --force
+ aclocal -I m4
+ autoconf
+ 
