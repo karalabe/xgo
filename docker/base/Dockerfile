@@ -41,6 +41,9 @@ RUN \
 # Fix any stock package issues
 RUN ln -s /usr/include/asm-generic /usr/include/asm
 
+# Add patches directory for patching later
+ADD patches /patches
+
 # Configure the container for OSX cross compilation
 ENV OSX_SDK     MacOSX10.11.sdk
 ENV OSX_NDK_X86 /usr/local/osx-ndk-x86

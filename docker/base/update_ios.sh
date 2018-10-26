@@ -25,7 +25,7 @@ function extract {
       bzip2 -dc $1 | tar xf -
       ;;
     *.zip)
-      unzip $1
+      unzip $1 > /dev/null
       ;;
   esac
 }
@@ -48,6 +48,8 @@ rm -rf $sdk
 
 # Pull the iOS cross compiler tool and build the toolchain
 git clone https://github.com/tpoechtrager/cctools-port.git
+# Patch autogen.sh by forcing libtoolize to regen config files (until PR https://github.com/tpoechtrager/cctools-port/pull/56 is accepted)
+patch /cctools-port/cctools/autogen.sh < /patches/autogen.patch
 
 if [[ "`basename $1`" =~ ^iPhoneSimulator ]]; then
   rm -rf $IOS_SIM_NDK_AMD64
