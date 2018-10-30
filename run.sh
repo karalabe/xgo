@@ -7,13 +7,17 @@ function buildBase() {
 }
 
 function buildGo() {
-    echo "Building go..."
-    docker build -t mysteriumnetwork/xgo-1.11 $@ docker/go-1.11.0/.
+    local tag=$1
+    shift;
+    echo "Building go... will tag as $tag"
+    docker build -t mysteriumnetwork/xgo-$tag $@ docker/go-1.11.0/.
 }
 
 function xgoTest() {
-    echo "Running tests..."
-    xgo -image=mysteriumnetwork/xgo-1.11 -targets=ios/arm64,android/arm64 -x -v -out mobilepkg -dest `pwd`/artifacts `pwd`/src/mobilepkg
+    local tag=$1
+    shift;
+    echo "Running tests... using tag: $tag"
+    xgo -image=mysteriumnetwork/xgo-$tag -targets=android/*,ios/* $@ -out mobilepkg -dest `pwd`/artifacts `pwd`/src/mobilepkg
 }
 
 cmd="$1"
