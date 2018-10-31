@@ -157,7 +157,7 @@ for TARGET in $TARGETS; do
     # Ignore android versions etc. build only archive and sources
     # Android api will be 21
     # Archive will be for both amd64 and arm64
-    $GOMOBILE bind --target=android/arm64,android/amd64 $X $V "${T[@]}" -o "/build/$NAME.aar" ./$PACK
+    $GOMOBILE bind --target=android/arm64,android/amd64,android/386 $X $V "${T[@]}" -o "/build/$NAME.aar" ./$PACK
   fi
   # Check and build for Linux targets
   if ([ $XGOOS == "." ] || [ $XGOOS == "linux" ]) && ([ $XGOARCH == "." ] || [ $XGOARCH == "amd64" ]); then
