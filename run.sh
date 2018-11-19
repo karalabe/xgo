@@ -20,6 +20,11 @@ function xgoTest() {
     xgo -image=mysteriumnetwork/xgo-$tag -targets=android/*,ios/* $@ -out mobilepkg -dest `pwd`/artifacts `pwd`/src/mobilepkg
 }
 
+function listAarFiles() {
+    local file=$1
+    unzip -l $file
+}
+
 cmd="$1"
 shift
 echo "Running $cmd ... with args $@"
