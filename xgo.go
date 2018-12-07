@@ -233,12 +233,24 @@ func pullDockerImage(image string) error {
 func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string) error {
 	// If a local build was requested, find the import path and mount all GOPATH sources
 	locals, mounts, paths := []string{}, []string{}, []string{}
+	var usesModules bool
 	if strings.HasPrefix(config.Repository, string(filepath.Separator)) || strings.HasPrefix(config.Repository, ".") {
 		// Resolve the repository import path from the file path
 		config.Repository = resolveImportPath(config.Repository)
 
+		// Check if the repo uses go 1.11 modules by determening if it has a go.mod file
+		if _, err := os.Stat(config.Repository + "/go.mod"); !os.IsNotExist(err) {
+			usesModules = true
+
+			// Check if it has a vendor folder to use that when building with mod
+			vendorfolder, err := os.Stat(config.Repository + "/vendor")
+			if !os.IsNotExist(err) && vendorfolder.Mode().IsDir() {
+				// TODO: how to pass -mod=vendor to the build script?
+			}
+		}
+
 		// Iterate over all the local libs and export the mount points
-		if os.Getenv("GOPATH") == "" {
+		if os.Getenv("GOPATH") == "" && !usesModules {
 			log.Fatalf("No $GOPATH is set or forwarded to xgo")
 		}
 		for _, gopath := range strings.Split(os.Getenv("GOPATH"), string(os.PathListSeparator)) {
@@ -303,6 +315,10 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 		args = append(args, []string{"-v", fmt.Sprintf("%s:%s:ro", locals[i], mounts[i])}...)
 	}
 	args = append(args, []string{"-e", "EXT_GOPATH=" + strings.Join(paths, ":")}...)
+
+	if usesModules {
+		args = append(args, []string{"-e", "GO111MODULE=on"}...)
+	}
 
 	args = append(args, []string{image, config.Repository}...)
 	return run(exec.Command("docker", args...))
