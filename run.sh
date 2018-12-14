@@ -17,7 +17,9 @@ function xgoTest() {
     local tag=$1
     shift;
     echo "Running tests... using tag: $tag"
-    xgo -image=mysteriumnetwork/xgo-$tag -targets=android/*,ios/* $@ -out mobilepkg -dest `pwd`/artifacts `pwd`/src/mobilepkg
+    xgo -image=mysteriumnetwork/xgo-$tag -targets=android/*,ios/* $@ -out mobilepkg -dest `pwd`/artifacts \
+    --ldflags="-w -s -X mobilepkg.Flag=success2" \
+    `pwd`/src/mobilepkg
 }
 
 function listAarFiles() {
