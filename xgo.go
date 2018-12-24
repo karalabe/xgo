@@ -16,27 +16,15 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"os/user"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	appdir "github.com/ProtonMail/go-appdir"
 )
 
 // Path where to cache external dependencies
-var depsCache string
-
-func init() {
-	// Initialize the external dependency cache path to a few possible locations
-	if home := os.Getenv("HOME"); home != "" {
-		depsCache = filepath.Join(home, ".xgo-cache")
-		return
-	}
-	if user, err := user.Current(); user != nil && err == nil && user.HomeDir != "" {
-		depsCache = filepath.Join(user.HomeDir, ".xgo-cache")
-		return
-	}
-	depsCache = filepath.Join(os.TempDir(), "xgo-cache")
-}
+var depsCache = appdir.New("xgo").UserCache()
 
 // Cross compilation docker containers
 var dockerBase = "karalabe/xgo-base"
