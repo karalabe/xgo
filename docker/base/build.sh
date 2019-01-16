@@ -151,6 +151,7 @@ NAME=`basename $1/$PACK`
 # when $PACK is defined
 if [[ "$USEMODULES" = true ]]; then
   PACK_RELPATH=""
+  NAME=`sed -n 's/module\ \(.*\)/\1/p' /source/go.mod`
 else
   PACK_RELPATH="./$PACK"
 fi
