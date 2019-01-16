@@ -238,49 +238,53 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 		// Resolve the repository import path from the file path
 		config.Repository = resolveImportPath(config.Repository)
 
+		// Determine if this is a module-based repository
+		var modFile = config.Repository + "/go.mod"
+		_, err := os.Stat(modFile)
+		usesModules = !os.IsNotExist(err)
+
 		// Iterate over all the local libs and export the mount points
 		if os.Getenv("GOPATH") == "" && !usesModules {
 			log.Fatalf("No $GOPATH is set or forwarded to xgo")
 		}
-		for _, gopath := range strings.Split(os.Getenv("GOPATH"), string(os.PathListSeparator)) {
-			// Since docker sandboxes volumes, resolve any symlinks manually
-			sources := filepath.Join(gopath, "src")
-			filepath.Walk(sources, func(path string, info os.FileInfo, err error) error {
-				// Skip any folders that errored out
-				if err != nil {
-					log.Printf("Failed to access GOPATH element %s: %v", path, err)
+		if !usesModules {
+			for _, gopath := range strings.Split(os.Getenv("GOPATH"), string(os.PathListSeparator)) {
+				// Since docker sandboxes volumes, resolve any symlinks manually
+				sources := filepath.Join(gopath, "src")
+				filepath.Walk(sources, func(path string, info os.FileInfo, err error) error {
+					// Skip any folders that errored out
+					if err != nil {
+						log.Printf("Failed to access GOPATH element %s: %v", path, err)
+						return nil
+					}
+					// Skip anything that's not a symlink
+					if info.Mode()&os.ModeSymlink == 0 {
+						return nil
+					}
+					// Resolve the symlink and skip if it's not a folder
+					target, err := filepath.EvalSymlinks(path)
+					if err != nil {
+						return nil
+					}
+					if info, err = os.Stat(target); err != nil || !info.IsDir() {
+						return nil
+					}
+					// Skip if the symlink points within GOPATH
+					if filepath.HasPrefix(target, sources) {
+						return nil
+					}
+
+					// Folder needs explicit mounting due to docker symlink security
+					locals = append(locals, target)
+					mounts = append(mounts, filepath.Join("/ext-go", strconv.Itoa(len(locals)), "src", strings.TrimPrefix(path, sources)))
+					paths = append(paths, filepath.Join("/ext-go", strconv.Itoa(len(locals))))
 					return nil
-				}
-				// Skip anything that's not a symlink
-				if info.Mode()&os.ModeSymlink == 0 {
-					return nil
-				}
-				// Resolve the symlink and skip if it's not a folder
-				target, err := filepath.EvalSymlinks(path)
-				if err != nil {
-					return nil
-				}
-				if info, err = os.Stat(target); err != nil || !info.IsDir() {
-					return nil
-				}
-				// Skip if the symlink points within GOPATH
-				if filepath.HasPrefix(target, sources) {
-					return nil
-				}
-				// Check if the repo uses go 1.11 modules by determening if it has a go.mod file
-				if _, err := os.Stat(path + "/go.mod"); !os.IsNotExist(err) && !usesModules {
-					usesModules = true
-				}
-				// Folder needs explicit mounting due to docker symlink security
-				locals = append(locals, target)
-				mounts = append(mounts, filepath.Join("/ext-go", strconv.Itoa(len(locals)), "src", strings.TrimPrefix(path, sources)))
+				})
+				// Export the main mount point for this GOPATH entry
+				locals = append(locals, sources)
+				mounts = append(mounts, filepath.Join("/ext-go", strconv.Itoa(len(locals)), "src"))
 				paths = append(paths, filepath.Join("/ext-go", strconv.Itoa(len(locals))))
-				return nil
-			})
-			// Export the main mount point for this GOPATH entry
-			locals = append(locals, sources)
-			mounts = append(mounts, filepath.Join("/ext-go", strconv.Itoa(len(locals)), "src"))
-			paths = append(paths, filepath.Join("/ext-go", strconv.Itoa(len(locals))))
+			}
 		}
 	}
 	// Assemble and run the cross compilation command
@@ -304,19 +308,28 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 		"-e", fmt.Sprintf("FLAG_BUILDMODE=%s", flags.Mode),
 		"-e", "TARGETS=" + strings.Replace(strings.Join(config.Targets, " "), "*", ".", -1),
 	}
-	for i := 0; i < len(locals); i++ {
-		args = append(args, []string{"-v", fmt.Sprintf("%s:%s:ro", locals[i], mounts[i])}...)
-	}
-	args = append(args, []string{"-e", "EXT_GOPATH=" + strings.Join(paths, ":")}...)
-
 	if usesModules {
 		args = append(args, []string{"-e", "GO111MODULE=on"}...)
+		args = append(args, []string{"-v", os.Getenv("GOPATH") + ":/go"}...)
 
-		// Check if it has a vendor folder to use that when building with mod
-		vendorfolder, err := os.Stat(config.Repository + "/vendor")
+		// Map this repository to the /source folder
+		absRepository, err := filepath.Abs(config.Repository)
+		args = append(args, []string{"-v", absRepository + ":/source"}...)
+
+		fmt.Printf("Enabled Go module support\n")
+
+		// Check whether it has a vendor folder, and if so, use it
+		vendorPath := absRepository + "/vendor"
+		vendorfolder, err := os.Stat(vendorPath)
 		if !os.IsNotExist(err) && vendorfolder.Mode().IsDir() {
-			// TODO: how to pass -mod=vendor to the build script?
+			args = append(args, []string{"-e", "FLAG_MOD=vendor"}...)
+			fmt.Printf("Using vendored Go module dependencies\n")
 		}
+	} else {
+		for i := 0; i < len(locals); i++ {
+			args = append(args, []string{"-v", fmt.Sprintf("%s:%s:ro", locals[i], mounts[i])}...)
+		}
+		args = append(args, []string{"-e", "EXT_GOPATH=" + strings.Join(paths, ":")}...)
 	}
 
 	args = append(args, []string{image, config.Repository}...)
