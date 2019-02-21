@@ -39,8 +39,8 @@ func init() {
 }
 
 // Cross compilation docker containers
-var dockerBase = "karalabe/xgo-base"
-var dockerDist = "karalabe/xgo-"
+var dockerBase = "techknowlogick/xgo:base"
+var dockerDist = "techknowlogick/xgo:"
 
 // Command line arguments to fine tune the compilation
 var (
