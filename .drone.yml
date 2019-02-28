@@ -1,0 +1,75 @@
+---
+kind: pipeline
+name: default
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build-go-1.12.0
+  pull: always
+  image: plugins/docker
+  settings:
+    dockerfile: docker/go-1.12.0/Dockerfile
+    dry_run: true
+    password:
+      from_secret: docker_password
+    repo: techknowlogick/xgo
+    tags: go-1.12.0
+    username:
+      from_secret: docker_username
+
+- name: build-go-1.12.x
+  pull: always
+  image: plugins/docker
+  settings:
+    dockerfile: docker/go-1.12.x/Dockerfile
+    dry_run: true
+    password:
+      from_secret: docker_password
+    repo: techknowlogick/xgo
+    tags: go-1.12.x
+    username:
+      from_secret: docker_username
+
+- name: build-go-1.11.5
+  pull: always
+  image: plugins/docker
+  settings:
+    dockerfile: docker/go-1.11.5/Dockerfile
+    dry_run: true
+    password:
+      from_secret: docker_password
+    repo: techknowlogick/xgo
+    tags: go-1.11.5
+    username:
+      from_secret: docker_username
+
+- name: build-go-1.11.x
+  pull: always
+  image: plugins/docker
+  settings:
+    dockerfile: docker/go-1.11.x/Dockerfile
+    dry_run: true
+    password:
+      from_secret: docker_password
+    repo: techknowlogick/xgo
+    tags: go-1.11.x
+    username:
+      from_secret: docker_username
+
+- name: build-go-latest
+  pull: always
+  image: plugins/docker
+  settings:
+    dockerfile: docker/go-latest/Dockerfile
+    dry_run: true
+    password:
+      from_secret: docker_password
+    repo: techknowlogick/xgo
+    tags: latest
+    username:
+      from_secret: docker_username
+
+...
