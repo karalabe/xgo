@@ -69,5 +69,10 @@ ln -s /go/bin/xgo /usr/bin/xgo
 # Install gomobile tool for android/ios frameworks
 echo "Installing gomobile..."
 go get -u golang.org/x/mobile/cmd/gomobile
-/go/bin/gomobile init -ndk /usr/local/android-ndk-r13b/
-/go/bin/gomobile version
+cd /go/src/golang.org/x/mobile
+git checkout a27dd33d354d004b2de14a791df5af8a00f68b8e
+go build ./cmd/gobind && mv ./gobind /usr/bin/
+go build ./cmd/gomobile && mv ./gomobile /usr/bin/
+
+/usr/bin/gomobile init -ndk /usr/local/android-ndk-r13b/
+/usr/bin/gomobile version

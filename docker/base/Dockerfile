@@ -3,24 +3,21 @@
 #
 # Released under the MIT license.
 
-FROM ubuntu:17.10
+FROM ubuntu:18.04
 
 MAINTAINER Péter Szilágyi <peterke@gmail.com>
 
 # Mark the image as xgo enabled to support xgo-in-xgo
 ENV XGO_IN_XGO 1
 
-
 # Configure the Go environment, since it's not going to change
 ENV PATH   /usr/local/go/bin:$PATH
 ENV GOPATH /go
-
 
 # Inject the remote file fetcher and checksum verifier
 ADD fetch.sh /fetch.sh
 ENV FETCH /fetch.sh
 RUN chmod +x $FETCH
-
 
 # Make sure apt-get is up to date and dependent packages are installed
 RUN \
@@ -68,6 +65,8 @@ RUN  \
   rm -rf /osxcross
 
 ENV PATH $OSX_NDK_X86/bin:$PATH
+ENV LD_LIBRARY_PATH=$OSX_NDK_X86/lib/:$LD_LIBRARY_PATH
+
 
 # Configure the container for iOS cross compilation
 ENV IOS_NDK_ARM_7     /usr/local/ios-ndk-arm-7
