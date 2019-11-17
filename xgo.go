@@ -269,13 +269,13 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 				// Folder needs explicit mounting due to docker symlink security
 				locals = append(locals, target)
 				mounts = append(mounts, filepath.Join("/ext-go", strconv.Itoa(len(locals)), "src", strings.TrimPrefix(path, sources)))
-				paths = append(paths, filepath.Join("/ext-go", strconv.Itoa(len(locals))))
+				paths = append(paths, filepath.ToSlash(filepath.Join("/ext-go", strconv.Itoa(len(locals)))))
 				return nil
 			})
 			// Export the main mount point for this GOPATH entry
 			locals = append(locals, sources)
 			mounts = append(mounts, filepath.Join("/ext-go", strconv.Itoa(len(locals)), "src"))
-			paths = append(paths, filepath.Join("/ext-go", strconv.Itoa(len(locals))))
+			paths = append(paths, filepath.ToSlash(filepath.Join("/ext-go", strconv.Itoa(len(locals)))))
 		}
 	}
 	// Assemble and run the cross compilation command
