@@ -18,6 +18,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -281,10 +282,16 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 	// Assemble and run the cross compilation command
 	fmt.Printf("Cross compiling %s...\n", config.Repository)
 
+	// Alter paths so they work for Windows
+	// Does not affect Linux paths
+	re := regexp.MustCompile("([A-Z]):")
+	folder_w := filepath.ToSlash(re.ReplaceAllString(folder, "/$1"))
+	depsCache_w := filepath.ToSlash(re.ReplaceAllString(depsCache, "/$1"))
+
 	args := []string{
 		"run", "--rm",
-		"-v", folder + ":/build",
-		"-v", depsCache + ":/deps-cache:ro",
+		"-v", folder_w + ":/build",
+		"-v", depsCache_w + ":/deps-cache:ro",
 		"-e", "REPO_REMOTE=" + config.Remote,
 		"-e", "REPO_BRANCH=" + config.Branch,
 		"-e", "PACK=" + config.Package,
