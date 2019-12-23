@@ -19,7 +19,7 @@
 #   FLAG_TAGS      - Optional tag flag to set on the Go builder
 #   FLAG_LDFLAGS   - Optional ldflags flag to set on the Go builder
 #   FLAG_BUILDMODE - Optional buildmode flag to set on the Go builder
-#   TARGETS        - Comma separated list of build targets to compile for
+#   TARGETS        - Space separated list of build targets to compile for
 #   GO_VERSION     - Bootstrapped version of Go to disable uncupported targets
 #   EXT_GOPATH     - GOPATH elements mounted from the host filesystem
 
