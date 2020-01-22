@@ -49,23 +49,6 @@ if [ $GO_VERSION -ge 180 ]; then
   GOOS=linux GOARCH=mipsle CGO_ENABLED=1 CC=mipsel-linux-gnu-gcc-6 go install std
 fi
 
-echo "Bootstrapping windows/amd64..."
-GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go install std
-
-echo "Bootstrapping windows/386..."
-GOOS=windows GOARCH=386 CGO_ENABLED=1 CC=i686-w64-mingw32-gcc go install std
-
-echo "Bootstrapping darwin/amd64..."
-GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 CC=o64-clang go install std
-
-echo "Bootstrapping darwin/386..."
-GOOS=darwin GOARCH=386 CGO_ENABLED=1 CC=o32-clang go install std
-
-# Install xgo within the container to enable internal cross compilation
-echo "Installing xgo-in-xgo..."
-go get -u github.com/karalabe/xgo
-ln -s /go/bin/xgo /usr/bin/xgo
-
 # Install gomobile tool for android/ios frameworks
 echo "Installing gomobile..."
 go get -u golang.org/x/mobile/cmd/gomobile

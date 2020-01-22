@@ -43,29 +43,3 @@ if [ "$DIST_LINUX_ARM" != "" ]; then
   GOOS=linux GOARCH=arm /usr/local/go/pkg/tool/linux_amd64/dist bootstrap
   rm -f `basename $DIST_LINUX_ARM`
 fi
-
-if [ "$DIST_OSX_64" != "" ]; then
-  tar -C /usr/local --wildcards -xzf `basename $DIST_OSX_64` go/pkg/darwin_amd64*
-  GOOS=darwin GOARCH=amd64 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap
-  rm -f `basename $DIST_OSX_64`
-fi
-if [ "$DIST_OSX_32" != "" ]; then
-  tar -C /usr/local --wildcards -xzf `basename $DIST_OSX_32` go/pkg/darwin_386*
-  GOOS=darwin GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap
-  rm -f `basename $DIST_OSX_32`
-fi
-
-if [ "$DIST_WIN_64" != "" ]; then
-  unzip -d /usr/local -q `basename $DIST_WIN_64` go/pkg/windows_amd64*
-  GOOS=windows GOARCH=amd64 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap
-  rm -f `basename $DIST_WIN_64`
-fi
-if [ "$DIST_WIN_32" != "" ]; then
-  unzip -d /usr/local -q `basename $DIST_WIN_32` go/pkg/windows_386*
-  GOOS=windows GOARCH=386 /usr/local/go/pkg/tool/linux_amd64/dist bootstrap
-  rm -f `basename $DIST_WIN_32`
-fi
-
-# Install xgo within the container to enable internal cross compilation
-echo "Installing xgo-in-xgo..."
-go get -u github.com/karalabe/xgo

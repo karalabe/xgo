@@ -41,54 +41,6 @@ RUN ln -s /usr/include/asm-generic /usr/include/asm
 # Add patches directory for patching later
 ADD patches /patches
 
-# Configure the container for OSX cross compilation
-ENV OSX_SDK     MacOSX10.11.sdk
-ENV OSX_NDK_X86 /usr/local/osx-ndk-x86
-
-RUN \
-  OSX_SDK_PATH=https://s3.dockerproject.org/darwin/v2/$OSX_SDK.tar.xz && \
-  $FETCH $OSX_SDK_PATH dd228a335194e3392f1904ce49aff1b1da26ca62       && \
-  tar -xf `basename $OSX_SDK_PATH` && rm -f `basename $OSX_SDK_PATH`
-
-ADD patch.tar.xz $OSX_SDK/usr/include/c++
-
-RUN tar -cf - $OSX_SDK/ | xz -c - > $OSX_SDK.tar.xz && rm -rf $OSX_SDK
-
-RUN  \
-  git clone https://github.com/tpoechtrager/osxcross.git && \
-  mv  $OSX_SDK.tar.xz /osxcross/tarballs/        && \
-  \
-  sed -i -e 's|-march=native||g' /osxcross/build_clang.sh /osxcross/wrapper/build.sh && \
-  UNATTENDED=yes OSX_VERSION_MIN=10.10 /osxcross/build.sh                             && \
-  mv /osxcross/target $OSX_NDK_X86                                                   && \
-  \
-  rm -rf /osxcross
-
-ENV PATH $OSX_NDK_X86/bin:$PATH
-ENV LD_LIBRARY_PATH=$OSX_NDK_X86/lib/:$LD_LIBRARY_PATH
-
-
-# Configure the container for iOS cross compilation
-ENV IOS_NDK_ARM_7     /usr/local/ios-ndk-arm-7
-ENV IOS_NDK_ARM64     /usr/local/ios-ndk-arm64
-ENV IOS_SIM_NDK_AMD64 /usr/local/ios-sim-ndk-amd64
-
-ADD update_ios.sh /update_ios.sh
-ENV UPDATE_IOS /update_ios.sh
-RUN chmod +x $UPDATE_IOS
-
-RUN \
-  IOS_SDK_FILE=iPhoneOS10.3.sdk.zip && \
-  IOS_SDK_PATH=http://resources.airnativeextensions.com/ios/$IOS_SDK_FILE         && \
-  $FETCH $IOS_SDK_PATH 7745815cd13d9b44c4cb0a2a40715e5410330233300ce4ff0ce106da17a636e8 && \
-  mv `basename $IOS_SDK_PATH` iPhoneOS10.3.sdk.tmp.zip           && \
-  $UPDATE_IOS /iPhoneOS10.3.sdk.tmp.zip                          && \
-  rm -rf /iPhoneOS10.3.sdk.tmp.zip  && \
-  cp -r /usr/local/osx-ndk-x86/SDK/MacOSX10.11.sdk/usr/include/c++/v1 /usr/local/ios-ndk-arm64/SDK/iPhoneOS10.3.sdk/usr/include/c++
-
-ENV PATH $IOS_NDK_ARM64/bin:$PATH
-ENV LD_LIBRARY_PATH $IOS_NDK_ARM64/lib/:$LD_LIBRARY_PATH
-
 # Configure the container for Android cross compilation
 ENV ANDROID_NDK         android-ndk-r13b
 ENV ANDROID_NDK_PATH    http://dl.google.com/android/repository/$ANDROID_NDK-linux-x86_64.zip
