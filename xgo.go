@@ -291,6 +291,7 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 		"-e", "DEPS=" + config.Dependencies,
 		"-e", "ARGS=" + config.Arguments,
 		"-e", "OUT=" + config.Prefix,
+		"--net", "host",
 		"-e", fmt.Sprintf("FLAG_V=%v", flags.Verbose),
 		"-e", fmt.Sprintf("FLAG_X=%v", flags.Steps),
 		"-e", fmt.Sprintf("FLAG_RACE=%v", flags.Race),
