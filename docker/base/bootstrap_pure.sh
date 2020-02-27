@@ -23,6 +23,8 @@ if [ "$GOROOT" == "" ]; then
   rm -f `basename $ROOT_DIST`
 
   export GOROOT=/usr/local/go
+
+  cat /patches/goruntime-*.diff | patch -p1 -f -N -r- -d "$GOROOT"
 fi
 export GOROOT_BOOTSTRAP=$GOROOT
 

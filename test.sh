@@ -13,4 +13,4 @@ docker run --rm \
     -e TARGETS=android/. \
     -e EXT_GOPATH=/ext-go/1 \
     -e GO111MODULE=off \
-    mysteriumnetwork/xgomobile:1.13.6 mobilepkg
+    mysteriumnetwork/xgomobile:1.13.8 mobilepkg

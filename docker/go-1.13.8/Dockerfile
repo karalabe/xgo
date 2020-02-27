@@ -1,4 +1,4 @@
-# Go cross compiler (xgo): Go 1.13
+# Go cross compiler (xgo): Go 1.14
 # Copyright (c) 2018 Péter Szilágyi. All rights reserved.
 #
 # Released under the MIT license.
@@ -8,10 +8,10 @@ FROM mysteriumnetwork/xgomobile:base
 MAINTAINER Péter Szilágyi <peterke@gmail.com>
 
 ENV CGO_LDFLAGS_ALLOW -fobjc-arc
-ENV GO_VERSION 1131
+ENV GO_VERSION 1138
 
 RUN \
-  export ROOT_DIST=https://dl.google.com/go/go1.13.1.linux-amd64.tar.gz && \
-  export ROOT_DIST_SHA=a1bc06deb070155c4f67c579f896a45eeda5a8fa54f35ba233304074c4abbbbd && \
+  export ROOT_DIST=https://dl.google.com/go/go1.13.8.linux-amd64.tar.gz && \
+  export ROOT_DIST_SHA=0567734d558aef19112f2b2873caa0c600f1b4a5827930eb5a7f35235219e9d8 && \
   \
 $BOOTSTRAP_PURE
