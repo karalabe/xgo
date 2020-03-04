@@ -1,13 +1,13 @@
 package testlib
 
-// #include <stdio.h>
-//
-// void sayHi() {
-//   printf("Hello, embedded C!\n");
-// }
-import "C"
+import (
+	"fmt"
+
+	"github.com/mysteriumnetwork/go-openvpn/openvpn3"
+)
 
 func HelloWorld() string {
-	C.sayHi()
+	config := openvpn3.NewConfig("test")
+	fmt.Println(config)
 	return "Hello"
 }
