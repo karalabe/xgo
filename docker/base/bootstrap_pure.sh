@@ -55,9 +55,10 @@ fi
 echo "Installing gomobile..."
 go get -u golang.org/x/mobile/cmd/gomobile
 cd /go/src/golang.org/x/mobile
-git checkout a27dd33d354d004b2de14a791df5af8a00f68b8e
+git checkout 3c8601c510d0503ac84d1e5cb8e24de550201dea
 go build ./cmd/gobind && mv ./gobind /usr/bin/
 go build ./cmd/gomobile && mv ./gomobile /usr/bin/
 
-/usr/bin/gomobile init -ndk /usr/local/android-ndk-r13b/
+# use prebuilt toolchains
+# /usr/bin/gomobile init -ndk /usr/local/android-ndk-r13b/
 /usr/bin/gomobile version
