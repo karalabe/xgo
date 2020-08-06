@@ -228,6 +228,8 @@ func pullDockerImage(image string) error {
 	return run(exec.Command("docker", "pull", image))
 }
 
+var goEnv = []string{"GOPROXY", "GOPRIVATE", "GOSUMDB", "GOMIPS"}
+
 // compile cross builds a requested package according to the given build specs
 // using a specific docker cross compilation image.
 func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string) error {
@@ -299,12 +301,17 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 		"-e", fmt.Sprintf("FLAG_BUILDMODE=%s", flags.Mode),
 		"-e", "TARGETS=" + strings.Replace(strings.Join(config.Targets, " "), "*", ".", -1),
 	}
-	for i := 0; i < len(locals); i++ {
-		args = append(args, []string{"-v", fmt.Sprintf("%s:%s:ro", locals[i], mounts[i])}...)
+	for _, key := range goEnv {
+		if e := os.Getenv(key); len(e) > 0 {
+			args = append(args, "-e", fmt.Sprintf("%s=%s", key, e))
+		}
 	}
-	args = append(args, []string{"-e", "EXT_GOPATH=" + strings.Join(paths, ":")}...)
+	for i := 0; i < len(locals); i++ {
+		args = append(args, "-v", fmt.Sprintf("%s:%s:ro", locals[i], mounts[i]))
+	}
+	args = append(args, "-e", "EXT_GOPATH="+strings.Join(paths, ":"))
 
-	args = append(args, []string{image, config.Repository}...)
+	args = append(args, image, config.Repository)
 	return run(exec.Command("docker", args...))
 }
 
@@ -333,6 +340,11 @@ func compileContained(config *ConfigFlags, flags *BuildFlags, folder string) err
 		fmt.Sprintf("FLAG_LDFLAGS=%s", flags.LdFlags),
 		fmt.Sprintf("FLAG_BUILDMODE=%s", flags.Mode),
 		"TARGETS=" + strings.Replace(strings.Join(config.Targets, " "), "*", ".", -1),
+	}
+	for _, key := range goEnv {
+		if e := os.Getenv(key); len(e) > 0 {
+			env = append(env, "-e", fmt.Sprintf("%s=%s", key, e))
+		}
 	}
 	if local {
 		env = append(env, "EXT_GOPATH=/non-existent-path-to-signal-local-build")
