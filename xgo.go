@@ -3,7 +3,7 @@
 //
 // Released under the MIT license.
 
-// Wrapper around the GCO cross compiler docker container.
+// Wrapper around the CGO cross compiler docker container.
 package main
 
 import (
