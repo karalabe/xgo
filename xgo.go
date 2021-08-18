@@ -54,6 +54,7 @@ var (
 	crossArgs   = flag.String("depsargs", "", "CGO dependency configure arguments")
 	targets     = flag.String("targets", "*/*", "Comma separated targets to build for")
 	dockerImage = flag.String("image", "", "Use custom docker image instead of official distribution")
+	dockerEnv   = flag.String("env", "", "Comma separated custom environments added to docker run -e")
 )
 
 // ConfigFlags is a simple set of flags to define the environment and dependencies.
@@ -66,6 +67,7 @@ type ConfigFlags struct {
 	Dependencies string   // CGO dependencies (configure/make based archives)
 	Arguments    string   // CGO dependency configure arguments
 	Targets      []string // Targets to build for
+	DockerEnv    []string // Custom environments added to docker run -e
 }
 
 // Command line arguments to pass to go build
@@ -172,6 +174,7 @@ func main() {
 		Dependencies: *crossDeps,
 		Arguments:    *crossArgs,
 		Targets:      strings.Split(*targets, ","),
+		DockerEnv:    strings.Split(*dockerEnv, ","),
 	}
 	flags := &BuildFlags{
 		Verbose: *buildVerbose,
@@ -299,6 +302,13 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 		"-e", fmt.Sprintf("FLAG_BUILDMODE=%s", flags.Mode),
 		"-e", "TARGETS=" + strings.Replace(strings.Join(config.Targets, " "), "*", ".", -1),
 	}
+	//add any custom environments to docker run -e
+	for _, s := range config.DockerEnv {
+		if s != "" {
+			args = append(args, []string{"-e", s}...)
+		}
+	}
+
 	for i := 0; i < len(locals); i++ {
 		args = append(args, []string{"-v", fmt.Sprintf("%s:%s:ro", locals[i], mounts[i])}...)
 	}
@@ -369,5 +379,6 @@ func run(cmd *exec.Cmd) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
+	fmt.Println(cmd)
 	return cmd.Run()
 }
